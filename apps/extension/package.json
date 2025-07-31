@@ -1,0 +1,38 @@
+{
+  "name": "@etsy-manager/extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Etsy Store Manager browser extension",
+  "scripts": {
+    "dev": "plasmo dev",
+    "build": "plasmo build",
+    "package": "plasmo package",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@etsy-manager/shared": "workspace:*",
+    "@plasmohq/messaging": "^0.6.1",
+    "@plasmohq/storage": "^1.9.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.258",
+    "@types/react": "18.2.48",
+    "@types/react-dom": "18.2.18",
+    "plasmo": "0.84.0",
+    "typescript": "5.5.4"
+  },
+  "manifest": {
+    "host_permissions": [
+      "https://*.etsy.com/*"
+    ],
+    "permissions": [
+      "storage",
+      "tabs",
+      "activeTab"
+    ]
+  }
+}

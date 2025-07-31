@@ -1,0 +1,28 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Production
+dist
+build
+out
+.next
+.plasmo
+
+# Testing
+coverage
+
+# Misc
+.DS_Store
+*.log
+.turbo
+
+# Generated files
+*.min.js
+*.min.css
+*.map
+
+# Lockfiles
+pnpm-lock.yaml
+package-lock.json
+yarn.lock

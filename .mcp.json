@@ -1,0 +1,174 @@
+{
+  "mcpServers": {
+    "desktop-commander": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@wonderwhy-er/desktop-commander@latest"]
+    },
+    "taskmaster-ai": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "--package=task-master-ai", "task-master-ai"],
+      "env": {
+        "ANTHROPIC_API_KEY": "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",
+        "PERPLEXITY_API_KEY": "pplx-ZlBFmYLDf2f2cEcTgY59SQcobbGqWoPzwXRVuuC7wIQXtWDaEnglish",
+        "MODEL": "claude-3-5-sonnet-20241022",
+        "PERPLEXITY_MODEL": "sonar-pro",
+        "MAX_TOKENS": "64000",
+        "TEMPERATURE": "0.2",
+        "DEFAULT_SUBTASKS": "5",
+        "DEFAULT_PRIORITY": "medium"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "slack": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-slack"],
+      "env": {
+        "SLACK_BOT_TOKEN": "xoxb-8729441664801-9029743814945-nrVRQ8LULpamRtWqxnML9HsJ",
+        "SLACK_CHANNEL_IDS": "C038B2LTH",
+        "SLACK_TEAM_ID": "T08MFCZKJPK"
+      }
+    },
+    "puppeteer": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+    },
+    "chatgpt-mcp-server": {
+      "type": "stdio",
+      "command": "/home/wes/.nvm/versions/node/v24.1.0/bin/node",
+      "args": ["/home/wes/chatgpt-mcp-server/src/index.js"],
+      "env": {
+        "OPENAI_API_KEY": "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"
+      }
+    },
+    "magic-ui": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@magicuidesign/mcp@latest"]
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@automatalabs/mcp-server-playwright"]
+    },
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "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"
+      }
+    },
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/wes", "/mnt/e", "/mnt/c"]
+    },
+    "git": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "mcp-git"]
+    },
+    "hf-mcp-server": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://huggingface.co/mcp",
+        "--header",
+        "Authorization: Bearer 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"
+      ]
+    },
+    "mcp-frontend-testing": {
+      "type": "stdio",
+      "command": "/home/wes/.nvm/versions/node/v24.1.0/bin/node",
+      "args": [
+        "/mnt/c/Users/wka00/mcp-servers/mcp-frontend-testing/dist/index.js",
+        "--transport=stdio"
+      ]
+    },
+    "perplexity-ask": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "perplexity-ask-mcp"],
+      "env": {
+        "PERPLEXITY_API_KEY": "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"
+      }
+    },
+    "hostinger-api": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "hostinger-api-mcp"],
+      "env": {
+        "DEBUG": "false",
+        "APITOKEN": "KhCPSFNXStLMDCJXDdLOD49lkw6qCagqu5Fhiw3w0d853525"
+      }
+    },
+    "n8n-mcp-server": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@drballs/n8n-mcp-server@0.1.13"],
+      "env": {
+        "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxZTA4YjY4OS0xZTYwLTQ0OWMtYWNlYi0zOGMyM2U1ZDhhMGEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzUwMTgwMjIzfQ._cdTWtDy8d4xxl2ZD_i3IMV_7dDd3e6lJnUhHPDaTyo",
+        "N8N_BASE_URL": "https://n8n.srv870105.hstgr.cloud/"
+      }
+    },
+    "railway-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@mh8974/railway-mcp",
+        "--key",
+        "b77de33b-0d90-48f3-b3cc-bbb92e084cec",
+        "--profile",
+        "splendid-mink-Znfe93"
+      ],
+      "env": {
+        "HOSTINGER_API_TOKEN": "ef913f49-2bd7-4802-b307-99961248f8de"
+      }
+    },
+    "mcp-browserbase": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@browserbasehq/mcp-browserbase",
+        "--key",
+        "b77de33b-0d90-48f3-b3cc-bbb92e084cec",
+        "--profile",
+        "splendid-mink-Znfe93"
+      ]
+    },
+    "mcp-stagehand": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@browserbasehq/mcp-stagehand",
+        "--key",
+        "b77de33b-0d90-48f3-b3cc-bbb92e084cec",
+        "--profile",
+        "splendid-mink-Znfe93"
+      ]
+    },
+    "unified-memory": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/mnt/c/Users/wka00/Documents/unified-memory-mcp-v2.js"]
+    }
+  }
+}

@@ -275,8 +275,19 @@ pnpm lint && pnpm typecheck && pnpm test
 
 1. **Check Session History**: Review `.taskmaster/sessions/` for previous retrospectives
 2. **Load Improvements**: Apply learnings from past sessions
-3. **Verify Environment**: Confirm all tools and dependencies are accessible
-4. **Review Current Tasks**: Run `task-master list` to understand project state
+3. **Verify Environment**: 
+   - Confirm all tools and dependencies are accessible
+   - Check if PostgreSQL and Redis are running: `docker ps`
+   - Verify database migrations are up to date: `cd apps/web && pnpm exec prisma migrate status`
+4. **Review Current Tasks**: 
+   - Use TodoRead/TodoWrite for task tracking instead of external task-master
+   - Check completed tasks and identify next priority
+5. **Test Environment Health**:
+   ```bash
+   # Quick health check
+   pnpm typecheck  # Verify TypeScript compilation
+   cd apps/web && pnpm run db:generate  # Ensure Prisma client is current
+   ```
 
 ### Session End Protocol (MANDATORY)
 

@@ -3,7 +3,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./*"
+      ]
     },
     "plugins": [
       {
@@ -12,8 +14,16 @@
     ],
     "incremental": true,
     "isolatedModules": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "strictNullChecks": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

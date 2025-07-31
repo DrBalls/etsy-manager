@@ -1,0 +1,51 @@
+appId: com.etsymanager.desktop
+productName: Etsy Store Manager
+directories:
+  output: dist-electron
+  buildResources: resources
+
+files:
+  - dist/**/*
+  - resources/**/*
+
+mac:
+  category: public.app-category.business
+  icon: resources/icon.icns
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: resources/entitlements.mac.plist
+  entitlementsInherit: resources/entitlements.mac.plist
+  notarize:
+    teamId: ${APPLE_TEAM_ID}
+
+win:
+  target:
+    - nsis
+    - portable
+  icon: resources/icon.ico
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: true
+
+linux:
+  target:
+    - AppImage
+    - deb
+    - rpm
+  icon: resources/icon.png
+  category: Office
+
+publish:
+  provider: github
+  owner: etsymanager
+  repo: desktop
+  private: false
+  releaseType: release
+
+protocols:
+  - name: etsy-manager
+    schemes:
+      - etsymanager

@@ -1,22 +1,63 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
-import { BrowserWindow, app, shell } from 'electron';
+import { 
+  BrowserWindow, 
+  app, 
+  shell, 
+  ipcMain, 
+  Menu, 
+  Tray, 
+  nativeImage,
+  dialog,
+  Notification
+} from 'electron';
 import { join } from 'path';
+import Store from 'electron-store';
+import { autoUpdater } from 'electron-updater';
+import { setupIpcHandlers } from './ipc-handlers';
+import { createAppMenu } from './menu';
+import { createTray } from './tray';
+
+// Initialize store
+const store = new Store();
+
+// Global reference to keep windows alive
+let mainWindow: BrowserWindow | null = null;
+let tray: Tray | null = null;
 
 function createWindow(): void {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1200,
-    height: 800,
+    height: 900,
+    minWidth: 800,
+    minHeight: 600,
     show: false,
-    autoHideMenuBar: true,
+    autoHideMenuBar: false,
+    icon: join(__dirname, '../../resources/icon.png'),
+    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
+      contextIsolation: true,
+      nodeIntegration: false,
     },
   });
 
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show();
+    if (!store.get('startMinimized')) {
+      mainWindow?.show();
+    }
+  });
+
+  mainWindow.on('close', (event) => {
+    if (!app.isQuitting && store.get('minimizeToTray', true)) {
+      event.preventDefault();
+      mainWindow?.hide();
+    }
+  });
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -24,12 +65,23 @@ function createWindow(): void {
     return { action: 'deny' };
   });
 
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
+  // Load the app
+  const startUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] 
+    ? process.env['ELECTRON_RENDERER_URL']
+    : store.get('apiUrl', 'http://localhost:3000');
+
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     void mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
   } else {
-    void mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+    // In production, load the web app
+    void mainWindow.loadURL(startUrl as string);
+  }
+}
+
+// Add app quit flag
+declare module 'electron' {
+  interface App {
+    isQuitting?: boolean;
   }
 }
 
@@ -46,13 +98,31 @@ void app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window);
   });
 
+  // Setup IPC handlers
+  setupIpcHandlers(store);
+
+  // Create tray
+  tray = createTray(mainWindow, store);
+
+  // Create app menu
+  const menu = createAppMenu(mainWindow, store);
+  Menu.setApplicationMenu(menu);
+
   createWindow();
+
+  // Setup auto updater
+  autoUpdater.checkForUpdatesAndNotify();
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
+});
+
+// Handle app quit
+app.on('before-quit', () => {
+  app.isQuitting = true;
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

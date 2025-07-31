@@ -24,7 +24,9 @@
             "id": 2,
             "title": "Create Shared Package for Common Code",
             "description": "Establish the /packages/shared directory for shared TypeScript types, utilities, and API clients.",
-            "dependencies": ["1.1"],
+            "dependencies": [
+              "1.1"
+            ],
             "details": "Add a package.json and tsconfig.json to /packages/shared. Implement example shared types and utility functions. Configure exports for use in other apps.",
             "status": "done",
             "testStrategy": "Import shared code into a sample app and verify type accessibility and correct build output."
@@ -33,7 +35,10 @@
             "id": 3,
             "title": "Bootstrap Application Packages",
             "description": "Create initial scaffolding for /apps/extension, /apps/web, /apps/desktop, and /apps/api with appropriate frameworks.",
-            "dependencies": ["1.1", "1.2"],
+            "dependencies": [
+              "1.1",
+              "1.2"
+            ],
             "details": "Use framework CLIs (e.g., create-next-app, Electron Forge, Express generator) to initialize each app. Ensure each app has its own package.json and tsconfig.json.",
             "status": "done",
             "testStrategy": "Run each app's development server or build process to confirm independent operation."
@@ -42,7 +47,11 @@
             "id": 4,
             "title": "Configure TypeScript, ESLint, and Prettier Across Monorepo",
             "description": "Set up TypeScript 5.x with strict mode, and configure ESLint and Prettier for consistent code quality and formatting.",
-            "dependencies": ["1.1", "1.2", "1.3"],
+            "dependencies": [
+              "1.1",
+              "1.2",
+              "1.3"
+            ],
             "details": "Create base tsconfig.json, .eslintrc, and .prettierrc at the root. Extend or override in each package/app as needed. Ensure strict mode is enabled globally.",
             "status": "done",
             "testStrategy": "Lint and format all packages; verify TypeScript strictness and consistent linting/formatting in all apps."
@@ -51,7 +60,9 @@
             "id": 5,
             "title": "Set Up Husky for Pre-commit Hooks",
             "description": "Install and configure Husky to enforce linting and formatting checks before commits.",
-            "dependencies": ["1.4"],
+            "dependencies": [
+              "1.4"
+            ],
             "details": "Install Husky at the root. Add pre-commit hooks to run ESLint and Prettier on staged files. Document hook behavior in CONTRIBUTING.md.",
             "status": "done",
             "testStrategy": "Attempt a commit with linting errors and verify that the commit is blocked until issues are resolved."
@@ -60,7 +71,10 @@
             "id": 6,
             "title": "Configure GitHub Actions for CI/CD",
             "description": "Set up GitHub Actions workflows to build, lint, and test all packages and apps on push and pull request events.",
-            "dependencies": ["1.4", "1.5"],
+            "dependencies": [
+              "1.4",
+              "1.5"
+            ],
             "details": "Create workflow YAML files in .github/workflows. Ensure jobs run pnpm install, build all apps, and execute lint/test scripts. Add status badges to README.",
             "status": "pending",
             "testStrategy": "Open a pull request and verify that all CI checks pass and failures are reported in GitHub."
@@ -74,9 +88,65 @@
         "details": "Implement OAuth 2.0 using Etsy's v3 API:\n\n```typescript\n// Use @etsy/oauth2-sdk or implement manually\nimport { AuthorizationCode } from 'simple-oauth2';\n\nconst client = new AuthorizationCode({\n  client: {\n    id: process.env.ETSY_CLIENT_ID,\n    secret: process.env.ETSY_CLIENT_SECRET\n  },\n  auth: {\n    tokenHost: 'https://api.etsy.com',\n    authorizePath: '/v3/public/oauth/connect',\n    tokenPath: '/v3/public/oauth/token'\n  }\n});\n\n// Store tokens securely using node-keytar for desktop\n// Use encrypted cookies for web (iron-session)\n// Chrome storage API for extension\n```\n\nImplement token refresh logic with exponential backoff",
         "testStrategy": "Test OAuth flow end-to-end, verify token refresh works correctly, ensure tokens are stored securely across all platforms",
         "priority": "high",
-        "dependencies": [1],
+        "dependencies": [
+          1
+        ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configure OAuth 2.0 Client and Scopes",
+            "description": "Set up the OAuth 2.0 client with Etsy API credentials, define required scopes, and register valid redirect URIs for both web and desktop applications.",
+            "dependencies": [],
+            "details": "Use the Etsy API key and secret from the .env file. Specify all necessary scopes for your application's features and ensure redirect URIs are registered and use HTTPS for web flows.",
+            "status": "pending",
+            "testStrategy": "Verify that the client ID, secret, scopes, and redirect URIs are correctly configured and accepted by Etsy's developer portal."
+          },
+          {
+            "id": 2,
+            "title": "Implement Authorization Code Flow with PKCE",
+            "description": "Develop the OAuth 2.0 authorization code flow, including PKCE support, to obtain authorization codes from Etsy for both web and desktop platforms.",
+            "dependencies": [
+              "2.1"
+            ],
+            "details": "Generate code verifier and code challenge for PKCE. Direct users to Etsy's authorization endpoint with correct parameters. Handle the redirect to capture the authorization code.",
+            "status": "pending",
+            "testStrategy": "Test that users are redirected to Etsy, can grant access, and the application receives the authorization code with PKCE validation."
+          },
+          {
+            "id": 3,
+            "title": "Exchange Authorization Code for Access and Refresh Tokens",
+            "description": "Implement the backend logic to exchange the received authorization code for access and refresh tokens using Etsy's token endpoint.",
+            "dependencies": [
+              "2.2"
+            ],
+            "details": "Make a secure POST request to Etsy's /v3/public/oauth/token endpoint with the authorization code, code verifier, and client credentials to obtain tokens.",
+            "status": "pending",
+            "testStrategy": "Verify that valid access and refresh tokens are received and that error handling is in place for failed exchanges."
+          },
+          {
+            "id": 4,
+            "title": "Securely Store and Retrieve Tokens per Platform",
+            "description": "Implement secure token storage mechanisms: encrypted cookies (iron-session) for web, node-keytar for desktop, and Chrome storage API for browser extensions.",
+            "dependencies": [
+              "2.3"
+            ],
+            "details": "Abstract token storage logic to support multiple platforms, ensuring tokens are encrypted at rest and only accessible to authorized application components.",
+            "status": "pending",
+            "testStrategy": "Test that tokens are stored, retrieved, and deleted securely on each supported platform, and cannot be accessed by unauthorized processes."
+          },
+          {
+            "id": 5,
+            "title": "Implement Token Refresh and Exponential Backoff Logic",
+            "description": "Develop logic to refresh expired access tokens using the refresh token, with exponential backoff for retrying failed refresh attempts.",
+            "dependencies": [
+              "2.4"
+            ],
+            "details": "Monitor token expiry, trigger refresh requests as needed, and implement exponential backoff for transient errors to avoid rate limits or lockouts.",
+            "status": "pending",
+            "testStrategy": "Simulate token expiry and network errors to verify that refresh logic works reliably and backoff is correctly applied on repeated failures."
+          }
+        ]
       },
       {
         "id": 3,
@@ -85,9 +155,69 @@
         "details": "Create API client using axios with p-queue for rate limiting:\n\n```typescript\nimport axios from 'axios';\nimport PQueue from 'p-queue';\nimport { Redis } from 'ioredis';\n\nclass EtsyAPIClient {\n  private queue = new PQueue({ \n    concurrency: 10,\n    interval: 1000,\n    intervalCap: 10 // Max 10 requests per second\n  });\n  \n  private cache = new Redis();\n  \n  async request<T>(endpoint: string, options?: RequestOptions): Promise<T> {\n    const cacheKey = `etsy:${endpoint}:${JSON.stringify(options)}`;\n    \n    // Check cache first\n    const cached = await this.cache.get(cacheKey);\n    if (cached) return JSON.parse(cached);\n    \n    return this.queue.add(async () => {\n      const response = await axios.get(`https://openapi.etsy.com/v3${endpoint}`, {\n        headers: {\n          'x-api-key': process.env.ETSY_API_KEY,\n          'Authorization': `Bearer ${await this.getAccessToken()}`\n        },\n        ...options\n      });\n      \n      // Cache successful responses\n      await this.cache.setex(cacheKey, 300, JSON.stringify(response.data));\n      return response.data;\n    });\n  }\n}\n```",
         "testStrategy": "Test rate limiting with burst requests, verify caching reduces API calls, test error handling and retry logic",
         "priority": "high",
-        "dependencies": [2],
+        "dependencies": [
+          2
+        ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up base API client structure with TypeScript interfaces",
+            "description": "Create the foundational TypeScript interfaces and base class structure for the Etsy API client, including request/response types, error types, and configuration options",
+            "dependencies": [],
+            "details": "Define interfaces for RequestOptions, APIResponse, EtsyError, and ClientConfig. Create the base EtsyAPIClient class skeleton with constructor that accepts configuration options. Set up proper TypeScript types for all Etsy API endpoints we'll be using. Include interfaces for rate limit configuration, cache configuration, and retry policies.",
+            "status": "pending",
+            "testStrategy": "Write unit tests to verify TypeScript compilation and interface contracts are properly defined"
+          },
+          {
+            "id": 2,
+            "title": "Implement rate limiting with p-queue",
+            "description": "Integrate p-queue library to handle rate limiting according to Etsy's API limits, ensuring no more than 10 requests per second",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Install and configure p-queue with proper concurrency (10), interval (1000ms), and intervalCap (10) settings. Implement the queue.add() wrapper in the request method. Add queue statistics tracking for monitoring request rates. Implement dynamic rate limit adjustment based on API response headers (X-RateLimit-Remaining, X-RateLimit-Reset).",
+            "status": "pending",
+            "testStrategy": "Create tests that fire 20+ concurrent requests and verify only 10 execute per second, test queue backpressure handling"
+          },
+          {
+            "id": 3,
+            "title": "Add Redis caching layer",
+            "description": "Implement Redis-based caching to reduce API calls and improve response times for frequently accessed data",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Set up Redis connection with proper error handling and reconnection logic. Implement cache key generation strategy that includes endpoint, query parameters, and user context. Add configurable TTL settings per endpoint type (listings: 5min, shop info: 1hour, etc). Implement cache invalidation methods for write operations. Add cache hit/miss metrics tracking.",
+            "status": "pending",
+            "testStrategy": "Test cache hit rates, verify TTL expiration, test cache invalidation on updates, measure performance improvements"
+          },
+          {
+            "id": 4,
+            "title": "Implement OAuth token management and refresh",
+            "description": "Build secure OAuth token storage, automatic refresh mechanism, and token lifecycle management",
+            "dependencies": [
+              "3.1",
+              "3.2"
+            ],
+            "details": "Create getAccessToken() method that checks token validity and refreshes if needed. Implement secure token storage using encryption. Add token refresh logic that handles refresh token rotation. Implement retry logic for token refresh failures. Add token expiry buffer (refresh 5 minutes before expiry). Handle concurrent token refresh requests to prevent race conditions.",
+            "status": "pending",
+            "testStrategy": "Test automatic token refresh, verify concurrent refresh handling, test token encryption/decryption"
+          },
+          {
+            "id": 5,
+            "title": "Add comprehensive error handling and retry logic",
+            "description": "Implement robust error handling with exponential backoff, circuit breaker pattern, and detailed error logging",
+            "dependencies": [
+              "3.1",
+              "3.2",
+              "3.3",
+              "3.4"
+            ],
+            "details": "Implement exponential backoff for retryable errors (429, 503, network errors). Add circuit breaker pattern to prevent cascading failures. Create custom error classes for different error types (RateLimitError, AuthError, NetworkError). Implement request/response interceptors for error handling and logging. Add detailed error context including request details, timestamps, and correlation IDs. Implement graceful degradation for non-critical endpoints.",
+            "status": "pending",
+            "testStrategy": "Test retry logic with simulated failures, verify circuit breaker triggers and recovery, test error logging completeness"
+          }
+        ]
       },
       {
         "id": 4,
@@ -96,7 +226,9 @@
         "details": "Setup PostgreSQL 15+ with Prisma ORM:\n\n```prisma\nmodel User {\n  id            String   @id @default(cuid())\n  email         String   @unique\n  etsyUserId    String   @unique\n  subscription  Subscription?\n  shops         Shop[]\n  createdAt     DateTime @default(now())\n}\n\nmodel Shop {\n  id            String   @id @default(cuid())\n  etsyShopId    String   @unique\n  name          String\n  userId        String\n  user          User     @relation(fields: [userId], references: [id])\n  listings      Listing[]\n  orders        Order[]\n  analytics     Analytics[]\n  \n  @@index([userId])\n}\n\nmodel Listing {\n  id            String   @id @default(cuid())\n  etsyListingId String   @unique\n  shopId        String\n  shop          Shop     @relation(fields: [shopId], references: [id])\n  title         String\n  tags          String[]\n  price         Decimal\n  inventory     Int\n  views         Int      @default(0)\n  favorites     Int      @default(0)\n  \n  @@index([shopId, etsyListingId])\n}\n```\n\nSetup migrations and seed data",
         "testStrategy": "Test database migrations, verify indexes improve query performance, test concurrent access patterns",
         "priority": "high",
-        "dependencies": [1],
+        "dependencies": [
+          1
+        ],
         "status": "pending",
         "subtasks": []
       },
@@ -107,7 +239,9 @@
         "details": "Create Chrome Extension using Manifest V3:\n\n```json\n// manifest.json\n{\n  \"manifest_version\": 3,\n  \"name\": \"Etsy Store Manager Pro\",\n  \"version\": \"1.0.0\",\n  \"permissions\": [\n    \"storage\",\n    \"alarms\",\n    \"notifications\"\n  ],\n  \"host_permissions\": [\n    \"https://*.etsy.com/*\"\n  ],\n  \"background\": {\n    \"service_worker\": \"background.js\",\n    \"type\": \"module\"\n  },\n  \"content_scripts\": [{\n    \"matches\": [\"https://*.etsy.com/*\"],\n    \"js\": [\"content.js\"],\n    \"css\": [\"styles.css\"]\n  }],\n  \"action\": {\n    \"default_popup\": \"popup.html\"\n  }\n}\n```\n\nUse Plasmo or WXT framework for modern extension development with React and hot reload",
         "testStrategy": "Test extension loads on all Etsy pages, verify content script injection, test message passing between components",
         "priority": "high",
-        "dependencies": [1],
+        "dependencies": [
+          1
+        ],
         "status": "pending",
         "subtasks": []
       },
@@ -118,7 +252,9 @@
         "details": "Build React-based overlay using Shadow DOM to avoid CSS conflicts:\n\n```typescript\n// content-script.tsx\nimport { createRoot } from 'react-dom/client';\nimport { QuickActionsOverlay } from './components/QuickActionsOverlay';\n\nclass EtsyEnhancer {\n  private shadowRoot: ShadowRoot;\n  \n  init() {\n    // Create container\n    const container = document.createElement('div');\n    container.id = 'etsy-manager-root';\n    document.body.appendChild(container);\n    \n    // Attach shadow DOM\n    this.shadowRoot = container.attachShadow({ mode: 'open' });\n    \n    // Inject styles\n    const styleSheet = new CSSStyleSheet();\n    styleSheet.replaceSync(overlayStyles);\n    this.shadowRoot.adoptedStyleSheets = [styleSheet];\n    \n    // Mount React app\n    const root = createRoot(this.shadowRoot);\n    root.render(<QuickActionsOverlay />);\n  }\n  \n  detectListingPage() {\n    // Use MutationObserver to detect navigation\n    const observer = new MutationObserver(() => {\n      if (window.location.pathname.includes('/listing/')) {\n        this.enhanceListingPage();\n      }\n    });\n  }\n}\n```",
         "testStrategy": "Test overlay doesn't interfere with Etsy's functionality, verify Shadow DOM isolation, test on different page types",
         "priority": "medium",
-        "dependencies": [5],
+        "dependencies": [
+          5
+        ],
         "status": "pending",
         "subtasks": []
       },
@@ -129,7 +265,10 @@
         "details": "Setup Next.js 14 with App Router and server components:\n\n```typescript\n// app/dashboard/page.tsx\nimport { Suspense } from 'react';\nimport { DashboardMetrics } from '@/components/DashboardMetrics';\nimport { RevenueChart } from '@/components/RevenueChart';\nimport { OrdersTable } from '@/components/OrdersTable';\n\nexport default async function Dashboard() {\n  return (\n    <div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6\">\n      <Suspense fallback={<MetricsSkeleton />}>\n        <DashboardMetrics />\n      </Suspense>\n      \n      <div className=\"col-span-full lg:col-span-3\">\n        <RevenueChart />\n      </div>\n      \n      <div className=\"col-span-full\">\n        <OrdersTable />\n      </div>\n    </div>\n  );\n}\n```\n\nUse:\n- Tailwind CSS for styling\n- Shadcn/ui for components\n- Recharts for data visualization\n- React Query for data fetching\n- Zustand for state management",
         "testStrategy": "Test responsive design on multiple devices, verify real-time updates work correctly, test loading states and error boundaries",
         "priority": "high",
-        "dependencies": [3, 4],
+        "dependencies": [
+          3,
+          4
+        ],
         "status": "pending",
         "subtasks": []
       },
@@ -140,7 +279,10 @@
         "details": "Create analytics service using TimescaleDB for time-series data:\n\n```typescript\n// services/analytics.service.ts\nimport { TimescaleDB } from '@timescale/timescaledb-node';\nimport { Queue } from 'bullmq';\n\nclass AnalyticsService {\n  private analyticsQueue = new Queue('analytics', {\n    connection: redis\n  });\n  \n  async trackListingView(listingId: string, metadata: ViewMetadata) {\n    await this.analyticsQueue.add('listing-view', {\n      listingId,\n      timestamp: new Date(),\n      ...metadata\n    });\n  }\n  \n  async calculateMetrics(shopId: string, period: Period) {\n    const metrics = await this.db.query(`\n      SELECT \n        date_trunc('day', timestamp) as date,\n        COUNT(DISTINCT order_id) as orders,\n        SUM(revenue) as revenue,\n        AVG(order_value) as avg_order_value\n      FROM shop_analytics\n      WHERE shop_id = $1 \n        AND timestamp >= NOW() - INTERVAL '${period}'\n      GROUP BY date\n      ORDER BY date\n    `, [shopId]);\n    \n    return this.enrichWithPredictions(metrics);\n  }\n}\n```\n\nImplement predictive analytics using TensorFlow.js",
         "testStrategy": "Test data aggregation accuracy, verify time-series queries performance, test prediction models with historical data",
         "priority": "medium",
-        "dependencies": [4, 7],
+        "dependencies": [
+          4,
+          7
+        ],
         "status": "pending",
         "subtasks": []
       },
@@ -151,7 +293,10 @@
         "details": "Implement inventory management with real-time sync:\n\n```typescript\n// services/inventory.service.ts\nclass InventoryService {\n  async syncInventory(shopId: string) {\n    const listings = await this.etsyClient.getShopListings(shopId);\n    \n    await this.db.transaction(async (tx) => {\n      for (const listing of listings) {\n        await tx.listing.upsert({\n          where: { etsyListingId: listing.listing_id },\n          update: {\n            quantity: listing.quantity,\n            price: listing.price.amount,\n            lastSyncedAt: new Date()\n          },\n          create: {\n            etsyListingId: listing.listing_id,\n            shopId,\n            title: listing.title,\n            quantity: listing.quantity,\n            sku: listing.sku,\n            price: listing.price.amount\n          }\n        });\n      }\n    });\n  }\n  \n  async checkReorderPoints() {\n    const lowStock = await this.db.listing.findMany({\n      where: {\n        quantity: { lte: this.db.raw('reorder_point') }\n      }\n    });\n    \n    for (const item of lowStock) {\n      await this.notificationService.sendLowStockAlert(item);\n    }\n  }\n}\n```\n\nImplement barcode scanning for desktop app using WebRTC",
         "testStrategy": "Test inventory sync accuracy, verify reorder alerts trigger correctly, test concurrent inventory updates",
         "priority": "medium",
-        "dependencies": [4, 7],
+        "dependencies": [
+          4,
+          7
+        ],
         "status": "pending",
         "subtasks": []
       },
@@ -162,7 +307,10 @@
         "details": "Implement SEO tools using natural language processing:\n\n```typescript\n// services/seo.service.ts\nimport { TfIdf } from 'natural';\nimport { GoogleTrends } from 'google-trends-api';\n\nclass SEOService {\n  async analyzeListingTitle(title: string, category: string) {\n    // Extract keywords using TF-IDF\n    const tfidf = new TfIdf();\n    tfidf.addDocument(title);\n    \n    // Get trending keywords from Google Trends\n    const trends = await GoogleTrends.interestOverTime({\n      keyword: title.split(' ').slice(0, 3).join(' '),\n      category: this.mapEtsyToGoogleCategory(category)\n    });\n    \n    // Analyze competitor listings\n    const competitors = await this.etsyClient.searchListings({\n      keywords: title,\n      limit: 100\n    });\n    \n    const competitorTags = this.extractCommonTags(competitors);\n    \n    return {\n      score: this.calculateSEOScore(title, competitorTags),\n      suggestions: this.generateSuggestions(title, trends, competitorTags),\n      competitorAnalysis: this.analyzeCompetitors(competitors)\n    };\n  }\n  \n  async runABTest(listingId: string, variants: TitleVariant[]) {\n    // Implement statistical significance testing\n    const test = new ABTest({\n      variants,\n      metric: 'conversion_rate',\n      minSampleSize: 1000\n    });\n    \n    return test.start();\n  }\n}\n```",
         "testStrategy": "Test keyword extraction accuracy, verify A/B test statistical significance calculations, test SEO score improvements correlate with performance",
         "priority": "high",
-        "dependencies": [3, 6],
+        "dependencies": [
+          3,
+          6
+        ],
         "status": "pending",
         "subtasks": []
       },
@@ -173,7 +321,10 @@
         "details": "Build order management with shipping provider integrations:\n\n```typescript\n// services/order.service.ts\nimport { ShipStation } from '@shipstation/node-client';\nimport { EasyPost } from '@easypost/api';\n\nclass OrderService {\n  private shipStation = new ShipStation({\n    apiKey: process.env.SHIPSTATION_KEY,\n    apiSecret: process.env.SHIPSTATION_SECRET\n  });\n  \n  async processNewOrders(shopId: string) {\n    const orders = await this.etsyClient.getShopReceipts(shopId, {\n      was_shipped: false\n    });\n    \n    for (const order of orders) {\n      // Create shipping label\n      const shipment = await this.createShipment(order);\n      \n      // Update Etsy with tracking\n      await this.etsyClient.updateShipment(order.receipt_id, {\n        tracking_code: shipment.tracking_code,\n        carrier_name: shipment.carrier,\n        send_bcc: true\n      });\n      \n      // Send customer notification\n      await this.emailService.sendShippingNotification(order, shipment);\n    }\n  }\n  \n  async batchPrintLabels(orderIds: string[]) {\n    const labels = await Promise.all(\n      orderIds.map(id => this.shipStation.createLabel(id))\n    );\n    \n    // Merge PDFs\n    const mergedPdf = await this.pdfService.merge(labels);\n    return mergedPdf;\n  }\n}\n```",
         "testStrategy": "Test order sync accuracy, verify shipping label generation, test bulk operations performance",
         "priority": "high",
-        "dependencies": [4, 7],
+        "dependencies": [
+          4,
+          7
+        ],
         "status": "pending",
         "subtasks": []
       },
@@ -184,7 +335,10 @@
         "details": "Implement CRM using customer data platform approach:\n\n```typescript\n// services/crm.service.ts\nimport { SendGrid } from '@sendgrid/mail';\nimport { Segment } from '@segment/analytics-node';\n\nclass CRMService {\n  async buildCustomerProfile(customerId: string) {\n    const orders = await this.db.order.findMany({\n      where: { customerId },\n      include: { items: true }\n    });\n    \n    const profile = {\n      totalSpent: orders.reduce((sum, o) => sum + o.total, 0),\n      orderCount: orders.length,\n      avgOrderValue: this.calculateAOV(orders),\n      categories: this.extractPreferredCategories(orders),\n      rfmScore: this.calculateRFM(orders),\n      predictedLTV: await this.predictLTV(customerId)\n    };\n    \n    // Update segment\n    this.segment.identify({\n      userId: customerId,\n      traits: profile\n    });\n    \n    return profile;\n  }\n  \n  async createEmailCampaign(segment: CustomerSegment) {\n    const customers = await this.getSegmentCustomers(segment);\n    \n    const campaign = await this.sendgrid.createCampaign({\n      name: segment.name,\n      subject: this.personalizeSubject(segment),\n      content: await this.generateContent(segment),\n      recipients: customers.map(c => ({\n        email: c.email,\n        substitutions: this.getPersonalization(c)\n      }))\n    });\n    \n    return campaign;\n  }\n}\n```",
         "testStrategy": "Test customer segmentation accuracy, verify email delivery rates, test personalization engine",
         "priority": "medium",
-        "dependencies": [4, 11],
+        "dependencies": [
+          4,
+          11
+        ],
         "status": "pending",
         "subtasks": []
       },
@@ -195,7 +349,9 @@
         "details": "Setup Electron app with auto-updates and offline sync:\n\n```typescript\n// main/index.ts\nimport { app, BrowserWindow, ipcMain } from 'electron';\nimport { autoUpdater } from 'electron-updater';\nimport Store from 'electron-store';\nimport { Database } from 'better-sqlite3';\n\nclass DesktopApp {\n  private mainWindow: BrowserWindow;\n  private store = new Store();\n  private db = new Database('etsy-manager.db');\n  \n  async createWindow() {\n    this.mainWindow = new BrowserWindow({\n      width: 1400,\n      height: 900,\n      webPreferences: {\n        preload: path.join(__dirname, 'preload.js'),\n        contextIsolation: true\n      }\n    });\n    \n    // Load web app or local build\n    if (app.isPackaged) {\n      this.mainWindow.loadFile('dist/index.html');\n    } else {\n      this.mainWindow.loadURL('http://localhost:3000');\n    }\n  }\n  \n  setupOfflineSync() {\n    // Queue operations when offline\n    ipcMain.handle('sync-operation', async (event, operation) => {\n      if (this.isOnline()) {\n        return await this.executeOperation(operation);\n      } else {\n        await this.queueOperation(operation);\n        return { queued: true };\n      }\n    });\n    \n    // Sync when back online\n    this.on('online', () => this.processQueuedOperations());\n  }\n}\n```",
         "testStrategy": "Test offline functionality, verify auto-update process, test native file system access",
         "priority": "medium",
-        "dependencies": [7],
+        "dependencies": [
+          7
+        ],
         "status": "pending",
         "subtasks": []
       },
@@ -206,7 +362,10 @@
         "details": "Create financial management system with accounting software integration:\n\n```typescript\n// services/financial.service.ts\nimport { QuickBooks } from 'node-quickbooks';\nimport { XeroClient } from 'xero-node';\n\nclass FinancialService {\n  async generateProfitLoss(shopId: string, period: DateRange) {\n    const revenue = await this.db.$queryRaw`\n      SELECT \n        DATE_TRUNC('month', created_at) as month,\n        SUM(total_price) as gross_revenue,\n        SUM(total_price * 0.065) as etsy_fees,\n        SUM(total_price * 0.03 + 0.25) as payment_fees,\n        SUM(shipping_cost) as shipping_costs\n      FROM orders\n      WHERE shop_id = ${shopId}\n        AND created_at BETWEEN ${period.start} AND ${period.end}\n      GROUP BY month\n    `;\n    \n    const expenses = await this.getExpenses(shopId, period);\n    \n    return {\n      revenue: revenue.map(r => ({\n        ...r,\n        netRevenue: r.gross_revenue - r.etsy_fees - r.payment_fees,\n        profit: r.gross_revenue - r.etsy_fees - r.payment_fees - r.shipping_costs - expenses[r.month]\n      })),\n      summary: this.calculateSummary(revenue, expenses)\n    };\n  }\n  \n  async syncWithQuickBooks(shopId: string) {\n    const qb = new QuickBooks({\n      consumerKey: process.env.QB_CONSUMER_KEY,\n      consumerSecret: process.env.QB_CONSUMER_SECRET,\n      token: await this.getQBToken(shopId)\n    });\n    \n    const orders = await this.getUnsyncedOrders(shopId);\n    \n    for (const order of orders) {\n      await qb.createInvoice({\n        CustomerRef: { value: order.customerId },\n        Line: order.items.map(item => ({\n          Amount: item.price * item.quantity,\n          DetailType: 'SalesItemLineDetail',\n          SalesItemLineDetail: {\n            ItemRef: { value: item.sku }\n          }\n        }))\n      });\n    }\n  }\n}\n```",
         "testStrategy": "Test financial calculations accuracy, verify accounting software sync, test tax report generation",
         "priority": "medium",
-        "dependencies": [4, 11],
+        "dependencies": [
+          4,
+          11
+        ],
         "status": "pending",
         "subtasks": []
       },
@@ -217,7 +376,10 @@
         "details": "Implement marketing automation with AI-powered optimization:\n\n```typescript\n// services/marketing.service.ts\nimport { FacebookAdsApi } from 'facebook-nodejs-business-sdk';\nimport { Buffer } from '@buffer/api-client';\nimport OpenAI from 'openai';\n\nclass MarketingService {\n  private openai = new OpenAI({ apiKey: process.env.OPENAI_KEY });\n  \n  async optimizeEtsyAds(shopId: string) {\n    const campaigns = await this.etsyClient.getAdsCampaigns(shopId);\n    const performance = await this.analyzeAdPerformance(campaigns);\n    \n    for (const campaign of campaigns) {\n      if (performance[campaign.id].roas < 2.0) {\n        // Pause underperforming campaigns\n        await this.etsyClient.pauseCampaign(campaign.id);\n      } else {\n        // Optimize budget allocation\n        const optimalBudget = this.calculateOptimalBudget(performance[campaign.id]);\n        await this.etsyClient.updateCampaignBudget(campaign.id, optimalBudget);\n      }\n    }\n  }\n  \n  async generateSocialContent(listing: Listing) {\n    const prompt = `Create engaging social media post for handmade product:\n      Title: ${listing.title}\n      Tags: ${listing.tags.join(', ')}\n      Price: $${listing.price}\n      \n      Generate Instagram caption with hashtags, Pinterest description, and Facebook post.`;\n    \n    const content = await this.openai.chat.completions.create({\n      model: 'gpt-4',\n      messages: [{ role: 'user', content: prompt }]\n    });\n    \n    return this.parseGeneratedContent(content);\n  }\n  \n  async schedulePostsAcrossPlatforms(content: SocialContent) {\n    const buffer = new Buffer({ token: process.env.BUFFER_TOKEN });\n    \n    await buffer.createPost({\n      profile_ids: [this.profiles.instagram, this.profiles.pinterest],\n      text: content.text,\n      media: content.images,\n      scheduled_at: this.getOptimalPostTime()\n    });\n  }\n}\n```",
         "testStrategy": "Test ad optimization algorithms, verify social media posting works across platforms, test AI content generation quality",
         "priority": "low",
-        "dependencies": [8, 12],
+        "dependencies": [
+          8,
+          12
+        ],
         "status": "pending",
         "subtasks": []
       },
@@ -228,7 +390,10 @@
         "details": "Setup Stripe billing with subscription management:\n\n```typescript\n// services/billing.service.ts\nimport Stripe from 'stripe';\nimport { PrismaClient } from '@prisma/client';\n\nclass BillingService {\n  private stripe = new Stripe(process.env.STRIPE_SECRET_KEY);\n  \n  async createSubscription(userId: string, planId: string) {\n    const user = await this.db.user.findUnique({ where: { id: userId } });\n    \n    // Create or get Stripe customer\n    let customerId = user.stripeCustomerId;\n    if (!customerId) {\n      const customer = await this.stripe.customers.create({\n        email: user.email,\n        metadata: { userId }\n      });\n      customerId = customer.id;\n      \n      await this.db.user.update({\n        where: { id: userId },\n        data: { stripeCustomerId: customerId }\n      });\n    }\n    \n    // Create subscription\n    const subscription = await this.stripe.subscriptions.create({\n      customer: customerId,\n      items: [{ price: this.getPriceId(planId) }],\n      trial_period_days: 14,\n      metadata: { userId, planId }\n    });\n    \n    // Update database\n    await this.db.subscription.create({\n      data: {\n        userId,\n        stripeSubscriptionId: subscription.id,\n        plan: planId,\n        status: subscription.status,\n        currentPeriodEnd: new Date(subscription.current_period_end * 1000)\n      }\n    });\n    \n    return subscription;\n  }\n  \n  async handleWebhook(event: Stripe.Event) {\n    switch (event.type) {\n      case 'customer.subscription.updated':\n      case 'customer.subscription.deleted':\n        await this.updateSubscriptionStatus(event.data.object);\n        break;\n      case 'invoice.payment_failed':\n        await this.handleFailedPayment(event.data.object);\n        break;\n    }\n  }\n}\n```",
         "testStrategy": "Test subscription creation and upgrades, verify webhook handling, test payment failure scenarios",
         "priority": "high",
-        "dependencies": [4, 7],
+        "dependencies": [
+          4,
+          7
+        ],
         "status": "pending",
         "subtasks": []
       },
@@ -239,7 +404,10 @@
         "details": "Implement admin dashboard using React Admin:\n\n```typescript\n// admin/App.tsx\nimport { Admin, Resource } from 'react-admin';\nimport { dataProvider } from './dataProvider';\nimport { authProvider } from './authProvider';\n\nexport const AdminApp = () => (\n  <Admin dataProvider={dataProvider} authProvider={authProvider}>\n    <Resource \n      name=\"users\" \n      list={UserList} \n      edit={UserEdit}\n      show={UserShow}\n      options={{ label: 'Users' }}\n    />\n    <Resource \n      name=\"subscriptions\" \n      list={SubscriptionList}\n      options={{ label: 'Subscriptions' }}\n    />\n    <Resource \n      name=\"analytics\" \n      list={AnalyticsDashboard}\n      options={{ label: 'System Analytics' }}\n    />\n  </Admin>\n);\n\n// Implement monitoring dashboard\nclass SystemMonitor {\n  async getMetrics() {\n    return {\n      apiUsage: await this.redis.get('api:usage:daily'),\n      activeUsers: await this.db.user.count({ \n        where: { lastActiveAt: { gte: subDays(new Date(), 1) } }\n      }),\n      errorRate: await this.getErrorRate(),\n      responseTime: await this.getAverageResponseTime(),\n      queueHealth: await this.checkQueueHealth()\n    };\n  }\n  \n  async generateUserReport(userId: string) {\n    const user = await this.db.user.findUnique({\n      where: { id: userId },\n      include: {\n        shops: {\n          include: {\n            listings: true,\n            orders: true\n          }\n        }\n      }\n    });\n    \n    return this.formatUserReport(user);\n  }\n}\n```",
         "testStrategy": "Test admin authentication and permissions, verify monitoring metrics accuracy, test support tool functionality",
         "priority": "low",
-        "dependencies": [7, 16],
+        "dependencies": [
+          7,
+          16
+        ],
         "status": "pending",
         "subtasks": []
       },
@@ -250,7 +418,11 @@
         "details": "Implement security best practices and compliance:\n\n```typescript\n// security/encryption.service.ts\nimport crypto from 'crypto';\nimport { Vault } from 'node-vault';\n\nclass SecurityService {\n  private vault = Vault({\n    endpoint: process.env.VAULT_ENDPOINT,\n    token: process.env.VAULT_TOKEN\n  });\n  \n  async encryptSensitiveData(data: string): Promise<string> {\n    const key = await this.vault.read('secret/data/encryption-key');\n    const cipher = crypto.createCipheriv('aes-256-gcm', key.data.key, key.data.iv);\n    \n    let encrypted = cipher.update(data, 'utf8', 'hex');\n    encrypted += cipher.final('hex');\n    \n    return encrypted + ':' + cipher.getAuthTag().toString('hex');\n  }\n  \n  async implementGDPR() {\n    // Data export\n    this.api.post('/gdpr/export', async (req, res) => {\n      const userData = await this.collectUserData(req.user.id);\n      const encrypted = await this.encryptExport(userData);\n      \n      res.json({ downloadUrl: await this.generateSecureUrl(encrypted) });\n    });\n    \n    // Data deletion\n    this.api.delete('/gdpr/delete', async (req, res) => {\n      await this.db.transaction(async (tx) => {\n        // Soft delete with audit trail\n        await tx.user.update({\n          where: { id: req.user.id },\n          data: { \n            deletedAt: new Date(),\n            email: crypto.randomBytes(16).toString('hex') + '@deleted.local',\n            personalData: null\n          }\n        });\n        \n        await tx.auditLog.create({\n          data: {\n            action: 'GDPR_DELETE',\n            userId: req.user.id,\n            timestamp: new Date()\n          }\n        });\n      });\n    });\n  }\n  \n  setupRateLimiting() {\n    return rateLimit({\n      windowMs: 15 * 60 * 1000, // 15 minutes\n      max: 100, // limit each IP to 100 requests per windowMs\n      handler: (req, res) => {\n        res.status(429).json({\n          error: 'Too many requests',\n          retryAfter: req.rateLimit.resetTime\n        });\n      }\n    });\n  }\n}\n```",
         "testStrategy": "Test encryption/decryption, verify GDPR compliance features, penetration testing for security vulnerabilities",
         "priority": "high",
-        "dependencies": [2, 4, 16],
+        "dependencies": [
+          2,
+          4,
+          16
+        ],
         "status": "pending",
         "subtasks": []
       },
@@ -261,7 +433,11 @@
         "details": "Setup monitoring and performance optimization:\n\n```typescript\n// monitoring/performance.service.ts\nimport { PrometheusExporter } from '@opentelemetry/exporter-prometheus';\nimport { MeterProvider } from '@opentelemetry/sdk-metrics';\nimport * as Sentry from '@sentry/node';\n\nclass PerformanceService {\n  private meter = new MeterProvider({\n    exporter: new PrometheusExporter({ port: 9090 })\n  }).getMeter('etsy-manager');\n  \n  setupMonitoring() {\n    // Initialize Sentry\n    Sentry.init({\n      dsn: process.env.SENTRY_DSN,\n      tracesSampleRate: 0.1,\n      profilesSampleRate: 0.1\n    });\n    \n    // Custom metrics\n    const apiLatency = this.meter.createHistogram('api_latency_ms');\n    const cacheHitRate = this.meter.createCounter('cache_hits');\n    const dbQueryTime = this.meter.createHistogram('db_query_duration_ms');\n    \n    // Middleware for tracking\n    this.app.use((req, res, next) => {\n      const start = Date.now();\n      \n      res.on('finish', () => {\n        apiLatency.record(Date.now() - start, {\n          method: req.method,\n          route: req.route?.path || 'unknown',\n          status: res.statusCode\n        });\n      });\n      \n      next();\n    });\n  }\n  \n  async optimizeDatabase() {\n    // Analyze slow queries\n    const slowQueries = await this.db.$queryRaw`\n      SELECT query, mean_exec_time, calls\n      FROM pg_stat_statements\n      WHERE mean_exec_time > 100\n      ORDER BY mean_exec_time DESC\n      LIMIT 20\n    `;\n    \n    // Create missing indexes\n    for (const query of slowQueries) {\n      const indexes = this.suggestIndexes(query);\n      for (const index of indexes) {\n        await this.db.$executeRaw(index);\n      }\n    }\n  }\n  \n  setupCaching() {\n    // Multi-layer caching\n    return {\n      l1: new NodeCache({ stdTTL: 60 }), // In-memory\n      l2: new Redis({ // Redis\n        host: process.env.REDIS_HOST,\n        port: 6379\n      }),\n      l3: new CloudflareKV({ // Edge caching\n        accountId: process.env.CF_ACCOUNT_ID,\n        namespaceId: process.env.CF_NAMESPACE_ID\n      })\n    };\n  }\n}\n```",
         "testStrategy": "Load testing with k6 or Artillery, verify monitoring metrics accuracy, test cache invalidation strategies",
         "priority": "medium",
-        "dependencies": [3, 7, 8],
+        "dependencies": [
+          3,
+          7,
+          8
+        ],
         "status": "pending",
         "subtasks": []
       },
@@ -272,7 +448,12 @@
         "details": "Implement deployment automation and documentation:\n\n```yaml\n# .github/workflows/deploy.yml\nname: Deploy\non:\n  push:\n    branches: [main]\n\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v3\n      - uses: actions/setup-node@v3\n        with:\n          node-version: '20'\n          cache: 'pnpm'\n      \n      - run: pnpm install\n      - run: pnpm test\n      - run: pnpm run test:e2e\n      \n  deploy-api:\n    needs: test\n    runs-on: ubuntu-latest\n    steps:\n      - name: Deploy to AWS ECS\n        run: |\n          aws ecs update-service \\\n            --cluster production \\\n            --service etsy-manager-api \\\n            --force-new-deployment\n  \n  deploy-extension:\n    needs: test\n    runs-on: ubuntu-latest\n    steps:\n      - name: Build extension\n        run: pnpm run build:extension\n      \n      - name: Upload to Chrome Web Store\n        uses: trmcnvn/chrome-addon@v2\n        with:\n          extension: extension.zip\n          publish: true\n          client-id: ${{ secrets.CHROME_CLIENT_ID }}\n```\n\nSetup documentation with Docusaurus:\n```typescript\n// docusaurus.config.js\nmodule.exports = {\n  title: 'Etsy Store Manager Pro',\n  tagline: 'Professional Etsy store management platform',\n  url: 'https://docs.etsymanager.com',\n  baseUrl: '/',\n  presets: [\n    [\n      'classic',\n      {\n        docs: {\n          sidebarPath: require.resolve('./sidebars.js'),\n          editUrl: 'https://github.com/etsymanager/docs/edit/main/'\n        },\n        theme: {\n          customCss: require.resolve('./src/css/custom.css')\n        }\n      }\n    ]\n  ]\n};\n```",
         "testStrategy": "Test deployment pipeline end-to-end, verify rollback procedures work, test documentation build process",
         "priority": "medium",
-        "dependencies": [1, 5, 7, 13],
+        "dependencies": [
+          1,
+          5,
+          7,
+          13
+        ],
         "status": "pending",
         "subtasks": []
       }

@@ -5,3 +5,5 @@ export * from './order';
 export * from './analytics';
 export * from './subscription';
 export * from './api';
+export * from './auth';
+export * from './etsy-api';

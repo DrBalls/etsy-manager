@@ -1,0 +1,454 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User account model
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  name            String?
+  password        String?
+  emailVerified   DateTime?
+  image           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // OAuth tokens
+  etsyAccessToken    String?
+  etsyRefreshToken   String?
+  etsyTokenExpiresAt DateTime?
+  etsyUserId         String?   @unique
+  
+  // Relations
+  shops            Shop[]
+  listings         Listing[]
+  orders           Order[]
+  scheduledTasks   ScheduledTask[]
+  activityLogs     ActivityLog[]
+  
+  @@index([email])
+  @@index([etsyUserId])
+}
+
+// Shop model
+model Shop {
+  id                String    @id @default(cuid())
+  etsyShopId        String    @unique
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Shop details from Etsy
+  shopName          String
+  title             String?
+  announcement      String?
+  currencyCode      String
+  url               String
+  imageUrl          String?
+  iconUrl           String?
+  
+  // Shop settings
+  isActive          Boolean   @default(true)
+  syncEnabled       Boolean   @default(true)
+  lastSyncAt        DateTime?
+  
+  // Shop statistics
+  listingActiveCount   Int      @default(0)
+  listingInactiveCount Int      @default(0)
+  saleCount            Int      @default(0)
+  reviewCount          Int      @default(0)
+  reviewAverage        Float?
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relations
+  listings          Listing[]
+  orders            Order[]
+  customers         Customer[]
+  shippingProfiles  ShippingProfile[]
+  shopSections      ShopSection[]
+  analyticsData     Analytics[]
+  
+  @@index([userId])
+  @@index([etsyShopId])
+}
+
+// Listing model
+model Listing {
+  id                String    @id @default(cuid())
+  etsyListingId     String    @unique
+  shopId            String
+  shop              Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Basic info
+  title             String
+  description       String    @db.Text
+  state             String    // active, inactive, draft, expired
+  url               String
+  
+  // Pricing
+  price             Decimal   @db.Money
+  currencyCode      String
+  originalPrice     Decimal?  @db.Money
+  
+  // Inventory
+  quantity          Int
+  skuNumber         String?
+  
+  // Categories and tags
+  taxonomyId        Int?
+  categoryPath      String[]
+  tags              String[]
+  materials         String[]
+  
+  // Media
+  images            ListingImage[]
+  videos            ListingVideo[]
+  
+  // Shop section
+  shopSectionId     String?
+  shopSection       ShopSection? @relation(fields: [shopSectionId], references: [id])
+  
+  // Stats
+  views             Int       @default(0)
+  favoritersCount   Int       @default(0)
+  
+  // Dates
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  etsyCreatedAt     DateTime
+  etsyUpdatedAt     DateTime
+  lastSyncAt        DateTime?
+  
+  // Relations
+  inventoryItems    InventoryItem[]
+  orders            OrderItem[]
+  
+  @@index([shopId])
+  @@index([userId])
+  @@index([etsyListingId])
+  @@index([state])
+}
+
+// Listing images
+model ListingImage {
+  id              String    @id @default(cuid())
+  listingId       String
+  listing         Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  etsyImageId     String    @unique
+  url             String
+  thumbnailUrl    String
+  rank            Int
+  width           Int
+  height          Int
+  
+  createdAt       DateTime  @default(now())
+  
+  @@index([listingId])
+}
+
+// Listing videos
+model ListingVideo {
+  id              String    @id @default(cuid())
+  listingId       String
+  listing         Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  etsyVideoId     String    @unique
+  url             String
+  thumbnailUrl    String
+  
+  createdAt       DateTime  @default(now())
+  
+  @@index([listingId])
+}
+
+// Inventory tracking
+model InventoryItem {
+  id              String    @id @default(cuid())
+  listingId       String
+  listing         Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  productId       String
+  propertyValues  Json      // Store property combinations
+  sku             String?
+  
+  quantity        Int
+  price           Decimal   @db.Money
+  
+  // Stock tracking
+  lowStockAlert   Int?      // Alert when quantity falls below this
+  isTracking      Boolean   @default(true)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@unique([listingId, productId])
+  @@index([listingId])
+}
+
+// Order model
+model Order {
+  id              String    @id @default(cuid())
+  etsyReceiptId   String    @unique
+  etsyOrderId     String    @default("") // Alias for etsyReceiptId
+  shopId          String
+  shop            Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customerId      String?
+  customer        Customer? @relation(fields: [customerId], references: [id])
+  
+  // Order details
+  orderNumber     String
+  status          String    // pending, processing, shipped, completed, cancelled
+  isPaid          Boolean
+  isShipped       Boolean
+  
+  // Financial
+  subtotal        Decimal   @db.Money
+  shipping        Decimal   @db.Money
+  tax             Decimal   @db.Money
+  total           Decimal   @db.Money
+  totalAmount     Decimal   @default(0) @db.Money  // Alias for total
+  currencyCode    String
+  
+  // Shipping info
+  shippingMethod  String?
+  shippingCarrier String?
+  trackingNumber  String?
+  trackingCarrier String?   // USPS, UPS, FedEx, etc.
+  trackingUrl     String?
+  
+  // Buyer info
+  buyerName       String    @default("")
+  buyerEmail      String?
+  buyerNote       String?
+  giftMessage     String?
+  personalMessage String?
+  
+  // Dates
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  orderDate       DateTime  @default(now()) // Alias for etsyCreatedAt
+  etsyCreatedAt   DateTime
+  shippedAt       DateTime?
+  shipByDate      DateTime?
+  
+  // Internal notes
+  internalNotes   String?   @db.Text
+  
+  // Relations
+  items           OrderItem[]
+  messages        OrderMessage[]
+  shippingAddress ShippingAddress?
+  
+  @@unique([shopId, etsyReceiptId])
+  @@index([shopId])
+  @@index([userId])
+  @@index([customerId])
+  @@index([status])
+  @@index([etsyCreatedAt])
+}
+
+// Order items
+model OrderItem {
+  id              String    @id @default(cuid())
+  orderId         String
+  order           Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  listingId       String
+  listing         Listing   @relation(fields: [listingId], references: [id])
+  
+  etsyTransactionId String  @unique
+  title           String
+  quantity        Int
+  price           Decimal   @db.Money
+  
+  // Variations
+  variations      Json?     // Store selected variations
+  sku             String?
+  
+  createdAt       DateTime  @default(now())
+  
+  @@index([orderId])
+  @@index([listingId])
+}
+
+// Order messages
+model OrderMessage {
+  id              String    @id @default(cuid())
+  orderId         String
+  order           Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  message         String    @db.Text
+  sender          String    // 'buyer' or 'seller'
+  sentAt          DateTime  @default(now())
+  read            Boolean   @default(false)
+  syncStatus      String?   // 'synced', 'failed', etc.
+  
+  @@index([orderId])
+  @@index([sentAt])
+}
+
+// Shipping address
+model ShippingAddress {
+  id              String    @id @default(cuid())
+  orderId         String    @unique
+  order           Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  name            String
+  line1           String
+  line2           String?
+  city            String
+  state           String?
+  postalCode      String
+  country         String
+  
+  createdAt       DateTime  @default(now())
+}
+
+// Customer model
+model Customer {
+  id              String    @id @default(cuid())
+  shopId          String
+  shop            Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  
+  etsyUserId      String
+  name            String?
+  email           String?
+  
+  // Stats
+  orderCount      Int       @default(0)
+  totalSpent      Decimal   @default(0) @db.Money
+  averageOrder    Decimal   @default(0) @db.Money
+  
+  // Dates
+  firstOrderAt    DateTime?
+  lastOrderAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  orders          Order[]
+  
+  @@unique([shopId, etsyUserId])
+  @@index([shopId])
+}
+
+// Shipping profiles
+model ShippingProfile {
+  id                    String    @id @default(cuid())
+  etsyShippingProfileId String    @unique
+  shopId                String
+  shop                  Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  
+  title                 String
+  originCountryIso      String
+  minProcessingDays     Int
+  maxProcessingDays     Int
+  
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  @@index([shopId])
+}
+
+// Shop sections
+model ShopSection {
+  id                String    @id @default(cuid())
+  etsyShopSectionId String    @unique
+  shopId            String
+  shop              Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  
+  title             String
+  rank              Int
+  activeListingCount Int      @default(0)
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relations
+  listings          Listing[]
+  
+  @@index([shopId])
+}
+
+// Analytics data
+model Analytics {
+  id              String    @id @default(cuid())
+  shopId          String
+  shop            Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  
+  date            DateTime  @db.Date
+  
+  // Traffic
+  visits          Int       @default(0)
+  uniqueVisitors  Int       @default(0)
+  pageViews       Int       @default(0)
+  
+  // Sales
+  orders          Int       @default(0)
+  revenue         Decimal   @default(0) @db.Money
+  conversionRate  Float     @default(0)
+  
+  // Engagement
+  favorites       Int       @default(0)
+  cartAdds        Int       @default(0)
+  
+  createdAt       DateTime  @default(now())
+  
+  @@unique([shopId, date])
+  @@index([shopId])
+  @@index([date])
+}
+
+// Scheduled tasks
+model ScheduledTask {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type            String    // sync_listings, update_inventory, etc
+  status          String    // pending, running, completed, failed
+  schedule        String?   // cron expression
+  
+  config          Json      // Task-specific configuration
+  lastRunAt       DateTime?
+  nextRunAt       DateTime?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+  @@index([nextRunAt])
+}
+
+// Activity logs
+model ActivityLog {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  action          String    // listing_created, order_shipped, etc
+  entityType      String    // listing, order, shop, etc
+  entityId        String
+  
+  metadata        Json?     // Additional context
+  
+  createdAt       DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}

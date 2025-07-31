@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: etsy_manager
+      POSTGRES_USER: ${POSTGRES_USER:-etsy_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-etsy_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-etsy_user}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        - NODE_ENV=production
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-etsy_user}:${POSTGRES_PASSWORD:-etsy_password}@postgres:5432/etsy_manager
+      REDIS_URL: redis://redis:6379
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      ETSY_CLIENT_ID: ${ETSY_CLIENT_ID}
+      ETSY_CLIENT_SECRET: ${ETSY_CLIENT_SECRET}
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: sh -c "npx prisma migrate deploy && npm start"
+
+volumes:
+  postgres_data:
+  redis_data:

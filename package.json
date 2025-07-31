@@ -22,7 +22,12 @@
     "typecheck": "turbo typecheck",
     "clean": "turbo clean && rm -rf node_modules",
     "prepare": "husky",
-    "postinstall": "husky install"
+    "postinstall": "husky install",
+    "db:push": "cd apps/web && pnpm prisma db push",
+    "db:migrate": "cd apps/web && pnpm prisma migrate dev",
+    "db:seed": "cd apps/web && pnpm prisma db seed",
+    "db:studio": "cd apps/web && pnpm prisma studio",
+    "setup": "pnpm install && pnpm db:push && pnpm db:seed"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",

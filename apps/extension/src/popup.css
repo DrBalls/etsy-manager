@@ -1,0 +1,236 @@
+/* Popup styles */
+.popup-container {
+  width: 350px;
+  min-height: 500px;
+  background: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: #222222;
+}
+
+.popup-header {
+  background: #f1641e;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.popup-header h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.popup-header .subtitle {
+  margin: 4px 0 0;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.popup-nav {
+  display: flex;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e1e3df;
+}
+
+.nav-btn {
+  flex: 1;
+  padding: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #595959;
+  transition: all 0.2s;
+}
+
+.nav-btn:hover {
+  background: #ebebeb;
+}
+
+.nav-btn.active {
+  color: #222222;
+  background: white;
+  border-bottom: 2px solid #f1641e;
+}
+
+.popup-content {
+  padding: 20px;
+}
+
+/* Home tab styles */
+.status-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.status-card.authenticated {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-icon {
+  font-size: 24px;
+}
+
+.quick-actions h3,
+.tips-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.action-btn {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  margin-bottom: 8px;
+  background: white;
+  border: 1px solid #e1e3df;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background: #f5f5f5;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn.primary {
+  background: #f1641e;
+  color: white;
+  border-color: #f1641e;
+}
+
+.action-btn.primary:hover {
+  background: #d9531a;
+}
+
+.tips-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e1e3df;
+}
+
+.tips-section ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.tips-section li {
+  margin-bottom: 8px;
+  color: #595959;
+  font-size: 13px;
+}
+
+.logout-btn {
+  width: 100%;
+  padding: 8px 16px;
+  margin-top: 20px;
+  background: white;
+  border: 1px solid #e1e3df;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #595959;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: #fee;
+  border-color: #d73502;
+  color: #d73502;
+}
+
+/* Auth section */
+.auth-section {
+  text-align: center;
+}
+
+.auth-message {
+  margin: 20px 0;
+  color: #595959;
+  line-height: 1.5;
+}
+
+/* Settings tab styles */
+.settings-tab h3 {
+  margin: 0 0 20px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.setting-item {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e1e3df;
+}
+
+.setting-item:last-of-type {
+  border-bottom: none;
+}
+
+.setting-item label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.setting-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.setting-item select {
+  margin-left: 8px;
+  padding: 4px 8px;
+  border: 1px solid #e1e3df;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.setting-description {
+  margin: 4px 0 0 24px;
+  font-size: 12px;
+  color: #595959;
+  line-height: 1.4;
+}
+
+.about-section {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #e1e3df;
+}
+
+.about-section h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.about-section p {
+  margin: 4px 0;
+  font-size: 12px;
+  color: #595959;
+}
+
+.links a {
+  color: #f1641e;
+  text-decoration: none;
+}
+
+.links a:hover {
+  text-decoration: underline;
+}

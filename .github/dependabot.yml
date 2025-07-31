@@ -1,0 +1,60 @@
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    groups:
+      development:
+        patterns:
+          - '@types/*'
+          - 'eslint*'
+          - 'prettier*'
+          - '@typescript-eslint/*'
+      production:
+        patterns:
+          - '*'
+        exclude-patterns:
+          - '@types/*'
+          - 'eslint*'
+          - 'prettier*'
+          - '@typescript-eslint/*'
+    labels:
+      - dependencies
+      - automated
+    commit-message:
+      prefix: chore
+      include: scope
+    reviewers:
+      - DrBalls
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    labels:
+      - dependencies
+      - github-actions
+      - automated
+    commit-message:
+      prefix: ci
+    reviewers:
+      - DrBalls
+
+  # Enable version updates for Docker
+  - package-ecosystem: docker
+    directory: /apps/api
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - docker
+      - automated
+    commit-message:
+      prefix: chore
+      include: scope

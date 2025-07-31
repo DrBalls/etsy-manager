@@ -1,0 +1,33 @@
+# Code Owners for Etsy Store Manager
+
+# Global owners
+* @DrBalls
+
+# Frontend
+/apps/web/ @DrBalls
+/packages/shared/src/components/ @DrBalls
+
+# Backend
+/apps/api/ @DrBalls
+
+# Extension
+/apps/extension/ @DrBalls
+
+# Desktop
+/apps/desktop/ @DrBalls
+
+# Shared utilities
+/packages/shared/ @DrBalls
+
+# Documentation
+*.md @DrBalls
+/docs/ @DrBalls
+
+# GitHub Actions
+/.github/ @DrBalls
+
+# Dependencies and configuration
+package.json @DrBalls
+pnpm-lock.yaml @DrBalls
+turbo.json @DrBalls
+tsconfig.json @DrBalls

@@ -1,0 +1,45 @@
+# Add labels to PRs based on file changes
+
+'app: web':
+  - apps/web/**/*
+
+'app: api':
+  - apps/api/**/*
+
+'app: extension':
+  - apps/extension/**/*
+
+'app: desktop':
+  - apps/desktop/**/*
+
+'package: shared':
+  - packages/shared/**/*
+
+documentation:
+  - '**/*.md'
+  - docs/**/*
+
+dependencies:
+  - package.json
+  - pnpm-lock.yaml
+  - '**/package.json'
+
+github-actions:
+  - .github/**/*
+
+config:
+  - turbo.json
+  - tsconfig.json
+  - .eslintrc.js
+  - .prettierrc
+  - '**/.eslintrc.js'
+  - '**/tsconfig.json'
+
+test:
+  - '**/*.test.ts'
+  - '**/*.test.tsx'
+  - '**/*.spec.ts'
+  - '**/*.spec.tsx'
+  - '**/tests/**/*'
+  - '**/test/**/*'
+  - '**/__tests__/**/*'

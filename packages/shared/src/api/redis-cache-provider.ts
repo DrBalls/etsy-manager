@@ -1,5 +1,6 @@
-import type { Redis } from 'ioredis';
-import { CacheProvider } from './cache-provider';
+import { type Redis } from 'ioredis';
+
+import { type CacheProvider } from './cache-provider';
 
 export interface RedisCacheConfig {
   keyPrefix?: string;
@@ -77,11 +78,15 @@ export class RedisCacheProvider implements CacheProvider {
       });
 
       await new Promise<void>((resolve, reject) => {
-        stream.on('end', async () => {
+        stream.on('end', () => {
           if (keysToDelete > 0) {
-            await pipeline.exec();
+            pipeline
+              .exec()
+              .then(() => resolve())
+              .catch(reject);
+          } else {
+            resolve();
           }
-          resolve();
         });
         stream.on('error', reject);
       });
@@ -111,17 +116,17 @@ export class RedisCacheProvider implements CacheProvider {
     try {
       const info = await this.redis.info('memory');
       const dbSize = await this.redis.dbsize();
-      
+
       // Parse memory usage from info
       const memoryMatch = info.match(/used_memory:(\d+)/);
-      const memoryUsage = memoryMatch ? parseInt(memoryMatch[1], 10) : undefined;
+      const memoryUsage = memoryMatch?.[1] ? parseInt(memoryMatch[1], 10) : undefined;
 
       return {
         connected: this.redis.status === 'ready',
         memoryUsage,
         keys: dbSize,
       };
-    } catch (error) {
+    } catch {
       return {
         connected: false,
       };
@@ -135,7 +140,7 @@ export class RedisCacheProvider implements CacheProvider {
     try {
       const result = await this.redis.ping();
       return result === 'PONG';
-    } catch (error) {
+    } catch {
       return false;
     }
   }

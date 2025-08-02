@@ -110,7 +110,7 @@ export class EtsyApiClientV2 {
     }
 
     // Queue the request
-    return this.queue.add(async (): Promise<ApiResponse<T>> => {
+    const result = await this.queue.add(async (): Promise<ApiResponse<T>> => {
       // Get auth token if needed
       let authHeader: Record<string, string> = {};
       if (!skipAuth) {
@@ -223,6 +223,8 @@ export class EtsyApiClientV2 {
 
       return response as ApiResponse<T>;
     });
+    
+    return result as ApiResponse<T>;
   }
 
   /**

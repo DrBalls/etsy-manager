@@ -131,3 +131,8 @@ export interface TokenProvider {
   getAccessToken(): Promise<string>;
   refreshToken?(refreshToken: string): Promise<void>;
 }
+
+// Extended config for API client v2
+export interface ExtendedApiClientConfig extends ApiClientConfig {
+  cacheProvider?: any; // Avoid circular dependency by using any here
+}

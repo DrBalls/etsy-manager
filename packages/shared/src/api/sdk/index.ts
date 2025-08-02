@@ -80,7 +80,8 @@ export class EtsySDK {
   async batch<T>(
     operations: Array<() => Promise<T>>,
   ): Promise<Array<{ success: boolean; data?: T; error?: Error }>> {
-    const results = await Promise.allSettled(operations);
+    const promises = operations.map((op) => op());
+    const results = await Promise.allSettled(promises);
 
     return results.map((result): { success: boolean; data?: T; error?: Error } => {
       if (result.status === 'fulfilled') {

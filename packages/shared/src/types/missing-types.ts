@@ -3,8 +3,8 @@ import { type PaginationParams } from './etsy-api';
 import { type Shop } from './shop';
 import { type User } from './user';
 
-// Extend interfaces that need to be exported from etsy-api-client-v2
-export { ExtendedApiClientConfig } from '../api/etsy-api-client-v2';
+// Note: ExtendedApiClientConfig is defined in ../api/etsy-api-client-v2.ts
+// but we need to re-export it from etsy-api.ts to avoid circular dependencies
 
 // Customer/Conversation types
 export interface Conversation {

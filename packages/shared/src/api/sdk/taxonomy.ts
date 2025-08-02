@@ -4,7 +4,7 @@ import {
   TaxonomyNodeProperty,
   PropertyValue,
   SellerTaxonomyNode
-} from '../../types/etsy-types';
+} from '../../types';
 
 /**
  * Taxonomy API SDK methods

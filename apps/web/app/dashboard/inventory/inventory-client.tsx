@@ -329,7 +329,7 @@ export function InventoryClient({ initialInventory, lowStockItems, shopId }: Inv
                 {lowStockItems.map((item) => (
                   <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center gap-4">
-                      {item.listing?.images?>[0] && (
+                      {item.listing?.images?.[0] && (
                         <img
                           src={item.listing.images[0].url}
                           alt={item.listing.title}
@@ -369,7 +369,7 @@ export function InventoryClient({ initialInventory, lowStockItems, shopId }: Inv
                 {inventory.filter(item => item.quantity === 0).map((item) => (
                   <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg bg-red-50">
                     <div className="flex items-center gap-4">
-                      {item.listing?.images?>[0] && (
+                      {item.listing?.images?.[0] && (
                         <img
                           src={item.listing.images[0].url}
                           alt={item.listing.title}

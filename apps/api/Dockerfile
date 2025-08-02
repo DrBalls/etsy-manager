@@ -50,12 +50,15 @@ COPY --from=builder --chown=nodejs:nodejs /app/packages/shared/dist ./node_modul
 # Switch to non-root user
 USER nodejs
 
-# Expose port
-EXPOSE 3001
+# Expose port (default to 8000, can be overridden by PORT env var)
+EXPOSE 8000
+
+# Set default PORT
+ENV PORT=8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })"
+  CMD node -e "require('http').get('http://localhost:' + (process.env.PORT || 8000) + '/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })"
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]

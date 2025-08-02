@@ -5,7 +5,7 @@ import {
   ConversationMessage,
   PaginatedResponse,
   SendMessageRequest
-} from '../../types/etsy-types';
+} from '../../types';
 
 /**
  * Customer Data SDK methods

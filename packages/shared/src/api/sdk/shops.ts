@@ -10,7 +10,7 @@ import {
   ShopAnnouncement,
   UpdateShopRequest,
   PaginatedResponse
-} from '../../types/etsy-types';
+} from '../../types';
 
 /**
  * Shop Management SDK methods

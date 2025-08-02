@@ -3,7 +3,7 @@ import axios, { type AxiosError, type AxiosInstance, type AxiosRequestConfig } f
 import { type ApiError as ApiErrorType, type ApiResponse, type RateLimitInfo } from '../types/api';
 import { AppError, RateLimitError } from '../utils/errors';
 
-export interface ApiClientConfig {
+export interface AxiosApiClientConfig {
   baseURL: string;
   timeout?: number;
   headers?: Record<string, string>;
@@ -12,9 +12,9 @@ export interface ApiClientConfig {
 
 export class ApiClient {
   private client: AxiosInstance;
-  private config: ApiClientConfig;
+  private config: AxiosApiClientConfig;
 
-  constructor(config: ApiClientConfig) {
+  constructor(config: AxiosApiClientConfig) {
     this.config = config;
     this.client = axios.create({
       baseURL: config.baseURL,

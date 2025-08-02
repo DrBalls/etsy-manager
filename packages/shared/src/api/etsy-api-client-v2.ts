@@ -66,8 +66,8 @@ export class EtsyApiClientV2 {
         autoStart: true,
         ...config.queue,
       },
-      onRateLimitUpdate: config.onRateLimitUpdate,
-      onError: config.onError,
+      onRateLimitUpdate: config.onRateLimitUpdate || (() => {}),
+      onError: config.onError || (() => {}),
     };
 
     this.tokenProvider = tokenProvider;
@@ -110,7 +110,7 @@ export class EtsyApiClientV2 {
     }
 
     // Queue the request
-    return this.queue.add(async () => {
+    return this.queue.add(async (): Promise<ApiResponse<T>> => {
       // Get auth token if needed
       let authHeader: Record<string, string> = {};
       if (!skipAuth) {
@@ -401,7 +401,7 @@ export class EtsyApiClientV2 {
    */
   private getCacheTTL(endpoint: string): number {
     // Check endpoint-specific TTL
-    for (const [pattern, ttl] of Object.entries(this.config.cache.ttlByEndpoint)) {
+    for (const [pattern, ttl] of Object.entries(this.config.cache.ttlByEndpoint || {})) {
       if (endpoint.includes(pattern)) {
         return ttl;
       }

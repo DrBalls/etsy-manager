@@ -13,6 +13,8 @@ out
 .env
 .env.*
 !.env.example
+!.env.docker.example
+!.env.*.example
 
 # IDE
 .vscode/*

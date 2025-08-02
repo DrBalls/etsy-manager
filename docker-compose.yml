@@ -5,15 +5,15 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: etsy_manager
+      POSTGRES_DB: ${POSTGRES_DB:-etsy_manager}
       POSTGRES_USER: ${POSTGRES_USER:-etsy_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-etsy_password}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - '${POSTGRES_PORT:-5432}:5432'
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-etsy_user}']
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-etsy_user} -d ${POSTGRES_DB:-etsy_manager}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -21,13 +21,13 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes ${REDIS_PASSWORD:+--requirepass $REDIS_PASSWORD}
     volumes:
       - redis_data:/data
     ports:
-      - '6379:6379'
+      - '${REDIS_PORT:-6379}:6379'
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ['CMD', 'redis-cli', '${REDIS_PASSWORD:+-a $REDIS_PASSWORD}', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -40,13 +40,14 @@ services:
         - NODE_ENV=production
     restart: unless-stopped
     environment:
-      NODE_ENV: production
-      DATABASE_URL: postgresql://${POSTGRES_USER:-etsy_user}:${POSTGRES_PASSWORD:-etsy_password}@postgres:5432/etsy_manager
-      REDIS_URL: redis://redis:6379
+      NODE_ENV: ${NODE_ENV:-production}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-etsy_user}:${POSTGRES_PASSWORD:-etsy_password}@postgres:5432/${POSTGRES_DB:-etsy_manager}
+      REDIS_URL: ${REDIS_PASSWORD:+redis://:$REDIS_PASSWORD@redis:6379}${REDIS_PASSWORD:-redis://redis:6379}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
       ETSY_CLIENT_ID: ${ETSY_CLIENT_ID}
       ETSY_CLIENT_SECRET: ${ETSY_CLIENT_SECRET}
+      ETSY_REDIRECT_URI: ${ETSY_REDIRECT_URI:-http://localhost:3000/api/auth/callback/etsy}
     ports:
       - '3000:3000'
     depends_on:
@@ -55,6 +56,33 @@ services:
       redis:
         condition: service_healthy
     command: sh -c "npx prisma migrate deploy && npm start"
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      args:
+        - NODE_ENV=production
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${API_PORT:-8000}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-etsy_user}:${POSTGRES_PASSWORD:-etsy_password}@postgres:5432/${POSTGRES_DB:-etsy_manager}
+      REDIS_URL: ${REDIS_PASSWORD:+redis://:$REDIS_PASSWORD@redis:6379}${REDIS_PASSWORD:-redis://redis:6379}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      ETSY_CLIENT_ID: ${ETSY_CLIENT_ID}
+      ETSY_CLIENT_SECRET: ${ETSY_CLIENT_SECRET}
+      ETSY_REDIRECT_URI: ${API_ETSY_REDIRECT_URI:-http://localhost:8000/api/v1/auth/etsy/callback}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+    ports:
+      - '${API_PORT:-8000}:${API_PORT:-8000}'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   postgres_data:

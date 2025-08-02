@@ -7,7 +7,7 @@ import {
   GetShopReceiptsRequest,
   UpdateShipmentRequest,
   CreateShipmentRequest
-} from '../../types/etsy-types';
+} from '../../types';
 
 /**
  * Order Processing SDK methods

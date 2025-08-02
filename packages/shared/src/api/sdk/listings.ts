@@ -1,13 +1,14 @@
 import { EtsyApiClientV2 } from '../etsy-api-client-v2';
+import { PaginatedResponse } from '../../types';
 import { 
   Listing,
   CreateListingRequest,
   UpdateListingRequest,
   ListingState,
+  ListingStateEnum,
   ListingImage,
   ListingVideo,
   ListingTranslation,
-  PaginatedResponse,
   GetListingsByShopRequest,
   UploadListingImageRequest,
   UploadListingVideoRequest,
@@ -73,7 +74,7 @@ export class ListingsAPI {
   ): Promise<PaginatedResponse<Listing>> {
     return this.getListingsByShop(shopId, {
       ...params,
-      state: ListingState.ACTIVE,
+      state: ListingStateEnum.ACTIVE,
     });
   }
 
@@ -86,7 +87,7 @@ export class ListingsAPI {
   ): Promise<PaginatedResponse<Listing>> {
     return this.getListingsByShop(shopId, {
       ...params,
-      state: ListingState.DRAFT,
+      state: ListingStateEnum.DRAFT,
     });
   }
 
@@ -140,14 +141,14 @@ export class ListingsAPI {
    * Activate a listing
    */
   async activateListing(listingId: string | number): Promise<Listing> {
-    return this.updateListingState(listingId, ListingState.ACTIVE);
+    return this.updateListingState(listingId, ListingStateEnum.ACTIVE);
   }
 
   /**
    * Deactivate a listing
    */
   async deactivateListing(listingId: string | number): Promise<Listing> {
-    return this.updateListingState(listingId, ListingState.INACTIVE);
+    return this.updateListingState(listingId, ListingStateEnum.INACTIVE);
   }
 
   /**

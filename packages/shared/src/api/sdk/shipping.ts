@@ -6,7 +6,7 @@ import {
   CreateShippingProfileRequest,
   UpdateShippingProfileRequest,
   PaginatedResponse
-} from '../../types/etsy-types';
+} from '../../types';
 
 /**
  * Shipping API SDK methods

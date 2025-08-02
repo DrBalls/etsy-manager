@@ -1,5 +1,5 @@
 import { EtsyApiClientV2 } from '../etsy-api-client-v2';
-import { User, Shop, PaginatedResponse } from '../../types/etsy-types';
+import { User, Shop, PaginatedResponse } from '../../types';
 
 /**
  * User API SDK methods

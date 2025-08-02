@@ -6,7 +6,7 @@ import {
   UpdateInventoryRequest,
   UpdateVariationImagesRequest,
   PropertyValue
-} from '../../types/etsy-types';
+} from '../../types';
 
 /**
  * Inventory Management SDK methods

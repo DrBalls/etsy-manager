@@ -10,12 +10,13 @@ import {
 } from '../types/etsy-api';
 import { 
   ETSY_API_V3_BASE_URL, 
-  ETSY_RATE_LIMITS,
+  ETSY_RATE_LIMITS
+} from '../config/etsy.config';
+import {
   isRateLimitError,
   getRetryAfter,
-  withExponentialBackoff,
   ExponentialBackoff
-} from '../index';
+} from '../utils/rate-limit';
 
 export interface CacheEntry {
   data: any;
@@ -67,8 +68,8 @@ export class EtsyApiClient {
         autoStart: true,
         ...config.queue,
       },
-      onRateLimitUpdate: config.onRateLimitUpdate,
-      onError: config.onError,
+      onRateLimitUpdate: config.onRateLimitUpdate || (() => {}),
+      onError: config.onError || (() => {}),
     };
 
     this.tokenProvider = tokenProvider;
@@ -370,7 +371,7 @@ export class EtsyApiClient {
    */
   private getCacheTTL(endpoint: string): number {
     // Check endpoint-specific TTL
-    for (const [pattern, ttl] of Object.entries(this.config.cache.ttlByEndpoint)) {
+    for (const [pattern, ttl] of Object.entries(this.config.cache.ttlByEndpoint || {})) {
       if (endpoint.includes(pattern)) {
         return ttl;
       }

@@ -111,7 +111,7 @@ export class EtsyApiClient {
     }
 
     // Queue the request
-    return this.queue.add(async () => {
+    const result = await this.queue.add(async () => {
       // Get auth token if needed
       let authHeader: Record<string, string> = {};
       if (!skipAuth) {
@@ -223,6 +223,8 @@ export class EtsyApiClient {
 
       return response as ApiResponse<T>;
     });
+    
+    return result as ApiResponse<T>;
   }
 
   /**

@@ -290,7 +290,7 @@ export class InventoryAPI {
 
     return {
       total_value: totalValue,
-      currency_code: currencyCode,
+      currency_code: currencyCode || 'USD',
       by_product: byProduct,
     };
   }
@@ -311,7 +311,7 @@ export class InventoryAPI {
     );
 
     return results.map((result, index) => ({
-      listing_id: updates[index].listing_id,
+      listing_id: updates[index]!.listing_id,
       result: result.status === 'fulfilled' ? result.value : new Error(result.reason),
     }));
   }
@@ -320,7 +320,7 @@ export class InventoryAPI {
    * Get inventory summary for a shop
    */
   async getShopInventorySummary(
-    shopId: string | number,
+    _shopId: string | number,
     listingIds: (string | number)[],
   ): Promise<{
     total_products: number;

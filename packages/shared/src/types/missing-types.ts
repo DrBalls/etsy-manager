@@ -72,6 +72,9 @@ export interface PropertyValue {
 
 export interface UpdateInventoryRequest {
   products: Partial<ListingProduct>[];
+  price_on_property?: number[];
+  quantity_on_property?: number[];
+  sku_on_property?: number[];
 }
 
 export interface UpdateVariationImagesRequest {

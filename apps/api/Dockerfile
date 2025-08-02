@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
@@ -29,7 +29,7 @@ RUN pnpm --filter @etsy-manager/shared build
 RUN pnpm --filter @etsy-manager/api build
 
 # Production stage
-FROM node:20-alpine AS production
+FROM node:24-alpine AS production
 
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init

@@ -1,12 +1,12 @@
-import { EtsyApiClientV2 } from '../etsy-api-client-v2';
 import {
-  ShippingProfile,
-  ShippingProfileDestination,
-  ShippingProfileUpgrade,
-  CreateShippingProfileRequest,
-  UpdateShippingProfileRequest,
-  PaginatedResponse
+  type CreateShippingProfileRequest,
+  PaginatedResponse,
+  type ShippingProfile,
+  type ShippingProfileDestination,
+  type ShippingProfileUpgrade,
+  type UpdateShippingProfileRequest,
 } from '../../types';
+import { type EtsyApiClientV2 } from '../etsy-api-client-v2';
 
 /**
  * Shipping API SDK methods
@@ -18,11 +18,9 @@ export class ShippingAPI {
    * Get shop shipping profiles
    * @see https://developers.etsy.com/documentation/reference/#operation/getShopShippingProfiles
    */
-  async getShippingProfiles(
-    shopId: string | number
-  ): Promise<ShippingProfile[]> {
+  async getShippingProfiles(shopId: string | number): Promise<ShippingProfile[]> {
     const response = await this.client.get<{ results: ShippingProfile[] }>(
-      `/v3/application/shops/${shopId}/shipping-profiles`
+      `/v3/application/shops/${shopId}/shipping-profiles`,
     );
     return response.results;
   }
@@ -33,10 +31,10 @@ export class ShippingAPI {
    */
   async getShippingProfile(
     shopId: string | number,
-    shippingProfileId: string | number
+    shippingProfileId: string | number,
   ): Promise<ShippingProfile> {
     return this.client.get<ShippingProfile>(
-      `/v3/application/shops/${shopId}/shipping-profiles/${shippingProfileId}`
+      `/v3/application/shops/${shopId}/shipping-profiles/${shippingProfileId}`,
     );
   }
 
@@ -46,11 +44,11 @@ export class ShippingAPI {
    */
   async createShippingProfile(
     shopId: string | number,
-    data: CreateShippingProfileRequest
+    data: CreateShippingProfileRequest,
   ): Promise<ShippingProfile> {
     return this.client.post<ShippingProfile>(
       `/v3/application/shops/${shopId}/shipping-profiles`,
-      data
+      data,
     );
   }
 
@@ -61,11 +59,11 @@ export class ShippingAPI {
   async updateShippingProfile(
     shopId: string | number,
     shippingProfileId: string | number,
-    data: UpdateShippingProfileRequest
+    data: UpdateShippingProfileRequest,
   ): Promise<ShippingProfile> {
     return this.client.put<ShippingProfile>(
       `/v3/application/shops/${shopId}/shipping-profiles/${shippingProfileId}`,
-      data
+      data,
     );
   }
 
@@ -75,10 +73,10 @@ export class ShippingAPI {
    */
   async deleteShippingProfile(
     shopId: string | number,
-    shippingProfileId: string | number
+    shippingProfileId: string | number,
   ): Promise<void> {
     await this.client.delete(
-      `/v3/application/shops/${shopId}/shipping-profiles/${shippingProfileId}`
+      `/v3/application/shops/${shopId}/shipping-profiles/${shippingProfileId}`,
     );
   }
 
@@ -88,10 +86,10 @@ export class ShippingAPI {
    */
   async getShippingProfileDestinations(
     shopId: string | number,
-    shippingProfileId: string | number
+    shippingProfileId: string | number,
   ): Promise<ShippingProfileDestination[]> {
     const response = await this.client.get<{ results: ShippingProfileDestination[] }>(
-      `/v3/application/shops/${shopId}/shipping-profiles/${shippingProfileId}/destinations`
+      `/v3/application/shops/${shopId}/shipping-profiles/${shippingProfileId}/destinations`,
     );
     return response.results;
   }
@@ -103,11 +101,11 @@ export class ShippingAPI {
   async createShippingProfileDestination(
     shopId: string | number,
     shippingProfileId: string | number,
-    data: any // Define proper type based on API
+    data: any, // Define proper type based on API
   ): Promise<ShippingProfileDestination> {
     return this.client.post<ShippingProfileDestination>(
       `/v3/application/shops/${shopId}/shipping-profiles/${shippingProfileId}/destinations`,
-      data
+      data,
     );
   }
 
@@ -119,11 +117,11 @@ export class ShippingAPI {
     shopId: string | number,
     shippingProfileId: string | number,
     destinationId: string | number,
-    data: any // Define proper type based on API
+    data: any, // Define proper type based on API
   ): Promise<ShippingProfileDestination> {
     return this.client.put<ShippingProfileDestination>(
       `/v3/application/shops/${shopId}/shipping-profiles/${shippingProfileId}/destinations/${destinationId}`,
-      data
+      data,
     );
   }
 
@@ -134,10 +132,10 @@ export class ShippingAPI {
   async deleteShippingProfileDestination(
     shopId: string | number,
     shippingProfileId: string | number,
-    destinationId: string | number
+    destinationId: string | number,
   ): Promise<void> {
     await this.client.delete(
-      `/v3/application/shops/${shopId}/shipping-profiles/${shippingProfileId}/destinations/${destinationId}`
+      `/v3/application/shops/${shopId}/shipping-profiles/${shippingProfileId}/destinations/${destinationId}`,
     );
   }
 
@@ -147,10 +145,10 @@ export class ShippingAPI {
    */
   async getShippingProfileUpgrades(
     shopId: string | number,
-    shippingProfileId: string | number
+    shippingProfileId: string | number,
   ): Promise<ShippingProfileUpgrade[]> {
     const response = await this.client.get<{ results: ShippingProfileUpgrade[] }>(
-      `/v3/application/shops/${shopId}/shipping-profiles/${shippingProfileId}/upgrades`
+      `/v3/application/shops/${shopId}/shipping-profiles/${shippingProfileId}/upgrades`,
     );
     return response.results;
   }
@@ -162,11 +160,11 @@ export class ShippingAPI {
   async createShippingProfileUpgrade(
     shopId: string | number,
     shippingProfileId: string | number,
-    data: any // Define proper type based on API
+    data: any, // Define proper type based on API
   ): Promise<ShippingProfileUpgrade> {
     return this.client.post<ShippingProfileUpgrade>(
       `/v3/application/shops/${shopId}/shipping-profiles/${shippingProfileId}/upgrades`,
-      data
+      data,
     );
   }
 
@@ -178,11 +176,11 @@ export class ShippingAPI {
     shopId: string | number,
     shippingProfileId: string | number,
     upgradeId: string | number,
-    data: any // Define proper type based on API
+    data: any, // Define proper type based on API
   ): Promise<ShippingProfileUpgrade> {
     return this.client.put<ShippingProfileUpgrade>(
       `/v3/application/shops/${shopId}/shipping-profiles/${shippingProfileId}/upgrades/${upgradeId}`,
-      data
+      data,
     );
   }
 
@@ -193,10 +191,10 @@ export class ShippingAPI {
   async deleteShippingProfileUpgrade(
     shopId: string | number,
     shippingProfileId: string | number,
-    upgradeId: string | number
+    upgradeId: string | number,
   ): Promise<void> {
     await this.client.delete(
-      `/v3/application/shops/${shopId}/shipping-profiles/${shippingProfileId}/upgrades/${upgradeId}`
+      `/v3/application/shops/${shopId}/shipping-profiles/${shippingProfileId}/upgrades/${upgradeId}`,
     );
   }
 
@@ -204,12 +202,10 @@ export class ShippingAPI {
    * Get shipping carriers
    * @see https://developers.etsy.com/documentation/reference/#operation/getShippingCarriers
    */
-  async getShippingCarriers(
-    originCountryIso: string
-  ): Promise<any[]> {
+  async getShippingCarriers(originCountryIso: string): Promise<any[]> {
     const response = await this.client.get<{ results: any[] }>(
       '/v3/application/shipping-carriers',
-      { origin_country_iso: originCountryIso }
+      { origin_country_iso: originCountryIso },
     );
     return response.results;
   }
@@ -221,7 +217,7 @@ export class ShippingAPI {
     listingId: string | number,
     destinationCountryIso: string,
     destinationRegion?: string,
-    destinationPostalCode?: string
+    destinationPostalCode?: string,
   ): Promise<{
     primary_cost: { amount: number; currency: string };
     secondary_cost?: { amount: number; currency: string };
@@ -242,18 +238,18 @@ export class ShippingAPI {
   async bulkAssignShippingProfile(
     shopId: string | number,
     shippingProfileId: string | number,
-    listingIds: (string | number)[]
+    listingIds: (string | number)[],
   ): Promise<Array<{ listing_id: string | number; success: boolean; error?: string }>> {
     const results = await Promise.allSettled(
-      listingIds.map(listingId =>
+      listingIds.map((listingId) =>
         this.client.patch(`/v3/application/listings/${listingId}`, {
           shipping_profile_id: Number(shippingProfileId),
-        })
-      )
+        }),
+      ),
     );
 
     return results.map((result, index) => ({
-      listing_id: listingIds[index],
+      listing_id: listingIds[index]!,
       success: result.status === 'fulfilled',
       error: result.status === 'rejected' ? result.reason?.message : undefined,
     }));

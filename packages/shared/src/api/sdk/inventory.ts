@@ -1,12 +1,11 @@
-import { EtsyApiClientV2 } from '../etsy-api-client-v2';
-import { 
-  ListingInventory,
-  ListingProduct,
-  ListingOffering,
-  UpdateInventoryRequest,
-  UpdateVariationImagesRequest,
-  PropertyValue
+import {
+  type ListingInventory,
+  type ListingOffering,
+  type ListingProduct,
+  type UpdateInventoryRequest,
+  type UpdateVariationImagesRequest,
 } from '../../types';
+import { type EtsyApiClientV2 } from '../etsy-api-client-v2';
 
 /**
  * Inventory Management SDK methods
@@ -23,10 +22,10 @@ export class InventoryAPI {
     options?: {
       includes?: ('listing' | 'attributes')[];
       show_deleted?: boolean;
-    }
+    },
   ): Promise<ListingInventory> {
     const params: any = {};
-    
+
     if (options?.includes?.length) {
       params.includes = options.includes.join(',');
     }
@@ -36,7 +35,7 @@ export class InventoryAPI {
 
     return this.client.get<ListingInventory>(
       `/v3/application/listings/${listingId}/inventory`,
-      params
+      params,
     );
   }
 
@@ -46,11 +45,11 @@ export class InventoryAPI {
    */
   async updateListingInventory(
     listingId: string | number,
-    data: UpdateInventoryRequest
+    data: UpdateInventoryRequest,
   ): Promise<ListingInventory> {
     return this.client.put<ListingInventory>(
       `/v3/application/listings/${listingId}/inventory`,
-      data
+      data,
     );
   }
 
@@ -73,35 +72,35 @@ export class InventoryAPI {
         offering_id: number;
         quantity: number;
       }>;
-    }>
+    }>,
   ): Promise<ListingInventory> {
     // Get current inventory
     const currentInventory = await this.getListingInventory(listingId);
-    
+
     // Build update request maintaining existing structure
-    const products = currentInventory.products.map(product => {
-      const update = updates.find(u => u.product_id === product.product_id);
-      
+    const products = currentInventory.products.map((product) => {
+      const update = updates.find((u) => u.product_id === product.product_id);
+
       if (update) {
         return {
           ...product,
-          offerings: product.offerings.map(offering => {
+          offerings: product.offerings.map((offering) => {
             const offeringUpdate = update.offerings.find(
-              o => o.offering_id === offering.offering_id
+              (o) => o.offering_id === offering.offering_id,
             );
-            
+
             if (offeringUpdate) {
               return {
                 ...offering,
                 quantity: offeringUpdate.quantity,
               };
             }
-            
+
             return offering;
           }),
         };
       }
-      
+
       return product;
     });
 
@@ -124,21 +123,21 @@ export class InventoryAPI {
         offering_id: number;
         price: number;
       }>;
-    }>
+    }>,
   ): Promise<ListingInventory> {
     const currentInventory = await this.getListingInventory(listingId);
-    
-    const products = currentInventory.products.map(product => {
-      const update = updates.find(u => u.product_id === product.product_id);
-      
+
+    const products = currentInventory.products.map((product) => {
+      const update = updates.find((u) => u.product_id === product.product_id);
+
       if (update) {
         return {
           ...product,
-          offerings: product.offerings.map(offering => {
+          offerings: product.offerings.map((offering) => {
             const offeringUpdate = update.offerings.find(
-              o => o.offering_id === offering.offering_id
+              (o) => o.offering_id === offering.offering_id,
             );
-            
+
             if (offeringUpdate) {
               return {
                 ...offering,
@@ -148,12 +147,12 @@ export class InventoryAPI {
                 },
               };
             }
-            
+
             return offering;
           }),
         };
       }
-      
+
       return product;
     });
 
@@ -173,20 +172,20 @@ export class InventoryAPI {
     updates: Array<{
       product_id: number;
       sku: string;
-    }>
+    }>,
   ): Promise<ListingInventory> {
     const currentInventory = await this.getListingInventory(listingId);
-    
-    const products = currentInventory.products.map(product => {
-      const update = updates.find(u => u.product_id === product.product_id);
-      
+
+    const products = currentInventory.products.map((product) => {
+      const update = updates.find((u) => u.product_id === product.product_id);
+
       if (update) {
         return {
           ...product,
           sku: update.sku,
         };
       }
-      
+
       return product;
     });
 
@@ -203,11 +202,13 @@ export class InventoryAPI {
    */
   async getLowStockProducts(
     listingId: string | number,
-    threshold = 10
-  ): Promise<Array<{
-    product: ListingProduct;
-    offerings: ListingOffering[];
-  }>> {
+    threshold = 10,
+  ): Promise<
+    Array<{
+      product: ListingProduct;
+      offerings: ListingOffering[];
+    }>
+  > {
     const inventory = await this.getListingInventory(listingId);
     const lowStockProducts: Array<{
       product: ListingProduct;
@@ -216,9 +217,9 @@ export class InventoryAPI {
 
     for (const product of inventory.products) {
       const lowStockOfferings = product.offerings.filter(
-        offering => offering.quantity <= threshold
+        (offering) => offering.quantity <= threshold,
       );
-      
+
       if (lowStockOfferings.length > 0) {
         lowStockProducts.push({
           product,
@@ -235,9 +236,9 @@ export class InventoryAPI {
    */
   async hasOutOfStockProducts(listingId: string | number): Promise<boolean> {
     const inventory = await this.getListingInventory(listingId);
-    
-    return inventory.products.some(product =>
-      product.offerings.some(offering => offering.quantity === 0)
+
+    return inventory.products.some((product) =>
+      product.offerings.some((offering) => offering.quantity === 0),
     );
   }
 
@@ -271,14 +272,14 @@ export class InventoryAPI {
       for (const offering of product.offerings) {
         productQuantity += offering.quantity;
         productValue += offering.quantity * (offering.price.amount / 100);
-        
+
         if (!currencyCode && offering.price.currency_code) {
           currencyCode = offering.price.currency_code;
         }
       }
 
       totalValue += productValue;
-      
+
       byProduct.push({
         product_id: product.product_id,
         sku: product.sku,
@@ -301,12 +302,12 @@ export class InventoryAPI {
     updates: Array<{
       listing_id: string | number;
       inventory_updates: UpdateInventoryRequest;
-    }>
+    }>,
   ): Promise<Array<{ listing_id: string | number; result: ListingInventory | Error }>> {
     const results = await Promise.allSettled(
-      updates.map(update =>
-        this.updateListingInventory(update.listing_id, update.inventory_updates)
-      )
+      updates.map((update) =>
+        this.updateListingInventory(update.listing_id, update.inventory_updates),
+      ),
     );
 
     return results.map((result, index) => ({
@@ -320,7 +321,7 @@ export class InventoryAPI {
    */
   async getShopInventorySummary(
     shopId: string | number,
-    listingIds: (string | number)[]
+    listingIds: (string | number)[],
   ): Promise<{
     total_products: number;
     total_quantity: number;
@@ -336,26 +337,24 @@ export class InventoryAPI {
     let outOfStockCount = 0;
     let lowStockCount = 0;
 
-    const inventories = await Promise.all(
-      listingIds.map(id => this.getListingInventory(id))
-    );
+    const inventories = await Promise.all(listingIds.map((id) => this.getListingInventory(id)));
 
     for (const inventory of inventories) {
       for (const product of inventory.products) {
         totalProducts++;
-        
+
         let productQuantity = 0;
         for (const offering of product.offerings) {
           productQuantity += offering.quantity;
           totalValue += offering.quantity * (offering.price.amount / 100);
-          
+
           if (!currencyCode && offering.price.currency_code) {
             currencyCode = offering.price.currency_code;
           }
         }
-        
+
         totalQuantity += productQuantity;
-        
+
         if (productQuantity === 0) {
           outOfStockCount++;
         } else if (productQuantity <= 10) {
@@ -381,11 +380,11 @@ export class InventoryAPI {
   async updateVariationImages(
     shopId: string | number,
     listingId: string | number,
-    data: UpdateVariationImagesRequest
+    data: UpdateVariationImagesRequest,
   ): Promise<ListingInventory> {
     return this.client.post<ListingInventory>(
       `/v3/application/shops/${shopId}/listings/${listingId}/variation-images`,
-      data
+      data,
     );
   }
 }

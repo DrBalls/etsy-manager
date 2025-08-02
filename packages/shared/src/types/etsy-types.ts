@@ -1,10 +1,7 @@
 // Etsy API specific types
-
 // Import types we need from other files
-import { ListingState as BaseListingState, Money as BaseMoney, ListingImage } from './listing';
-import { Shop as BaseShop } from './shop';
-import { User as BaseUser } from './user';
-import { PaginationParams as BasePaginationParams } from './etsy-api';
+import { type PaginationParams as BasePaginationParams } from './etsy-api';
+import { ListingState as BaseListingState, type Money as BaseMoney, ListingImage } from './listing';
 
 // Re-export with specific names to avoid conflicts
 export { BaseListingState as ListingState };
@@ -113,8 +110,8 @@ export const ListingStateEnum = {
   INACTIVE: 'inactive' as BaseListingState,
   SOLD_OUT: 'sold_out' as BaseListingState,
   DRAFT: 'draft' as BaseListingState,
-  EXPIRED: 'expired' as BaseListingState
-}
+  EXPIRED: 'expired' as BaseListingState,
+};
 
 export interface ListingVideo {
   video_id: number;
@@ -135,7 +132,7 @@ export interface ListingTranslation {
   tags: string[];
 }
 
-export interface GetListingsByShopRequest extends BasePaginationParams {
+export interface GetListingsByShopRequest extends Omit<BasePaginationParams, 'sort_order'> {
   state?: BaseListingState;
   sort_on?: 'created' | 'price' | 'updated' | 'score';
   sort_order?: 'asc' | 'desc' | 'ascending' | 'descending';

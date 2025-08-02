@@ -1,13 +1,13 @@
-import { EtsyApiClientV2 } from '../etsy-api-client-v2';
-import { 
-  Receipt,
-  Shipment,
-  Transaction,
-  PaginatedResponse,
-  GetShopReceiptsRequest,
-  UpdateShipmentRequest,
-  CreateShipmentRequest
+import {
+  type CreateShipmentRequest,
+  type GetShopReceiptsRequest,
+  type PaginatedResponse,
+  type Receipt,
+  type Shipment,
+  type Transaction,
+  type UpdateShipmentRequest,
 } from '../../types';
+import { type EtsyApiClientV2 } from '../etsy-api-client-v2';
 
 /**
  * Order Processing SDK methods
@@ -21,12 +21,9 @@ export class OrdersAPI {
    */
   async getShopReceipts(
     shopId: string | number,
-    params?: GetShopReceiptsRequest
+    params?: GetShopReceiptsRequest,
   ): Promise<PaginatedResponse<Receipt>> {
-    return this.client.getPaginated<Receipt>(
-      `/v3/application/shops/${shopId}/receipts`,
-      params
-    );
+    return this.client.getPaginated<Receipt>(`/v3/application/shops/${shopId}/receipts`, params);
   }
 
   /**
@@ -34,25 +31,17 @@ export class OrdersAPI {
    */
   async getAllShopReceipts(
     shopId: string | number,
-    filters?: Omit<GetShopReceiptsRequest, 'limit' | 'offset'>
+    filters?: Omit<GetShopReceiptsRequest, 'limit' | 'offset'>,
   ): Promise<Receipt[]> {
-    return this.client.getAllPages<Receipt>(
-      `/v3/application/shops/${shopId}/receipts`,
-      filters
-    );
+    return this.client.getAllPages<Receipt>(`/v3/application/shops/${shopId}/receipts`, filters);
   }
 
   /**
    * Get a specific receipt
    * @see https://developers.etsy.com/documentation/reference/#operation/getShopReceipt
    */
-  async getReceipt(
-    shopId: string | number,
-    receiptId: string | number
-  ): Promise<Receipt> {
-    return this.client.get<Receipt>(
-      `/v3/application/shops/${shopId}/receipts/${receiptId}`
-    );
+  async getReceipt(shopId: string | number, receiptId: string | number): Promise<Receipt> {
+    return this.client.get<Receipt>(`/v3/application/shops/${shopId}/receipts/${receiptId}`);
   }
 
   /**
@@ -61,10 +50,10 @@ export class OrdersAPI {
    */
   async getReceiptTransactions(
     shopId: string | number,
-    receiptId: string | number
+    receiptId: string | number,
   ): Promise<Transaction[]> {
     const response = await this.client.get<{ results: Transaction[] }>(
-      `/v3/application/shops/${shopId}/receipts/${receiptId}/transactions`
+      `/v3/application/shops/${shopId}/receipts/${receiptId}/transactions`,
     );
     return response.results;
   }
@@ -75,10 +64,10 @@ export class OrdersAPI {
   async getReceiptsByStatus(
     shopId: string | number,
     status: 'open' | 'unshipped' | 'unpaid' | 'completed' | 'processing' | 'all',
-    params?: Omit<GetShopReceiptsRequest, 'was_shipped' | 'was_paid'>
+    params?: Omit<GetShopReceiptsRequest, 'was_shipped' | 'was_paid'>,
   ): Promise<PaginatedResponse<Receipt>> {
     const filters: GetShopReceiptsRequest = { ...params };
-    
+
     switch (status) {
       case 'unshipped':
         filters.was_shipped = false;
@@ -103,11 +92,11 @@ export class OrdersAPI {
   async createShipment(
     shopId: string | number,
     receiptId: string | number,
-    data: CreateShipmentRequest
+    data: CreateShipmentRequest,
   ): Promise<Shipment> {
     return this.client.post<Shipment>(
       `/v3/application/shops/${shopId}/receipts/${receiptId}/tracking`,
-      data
+      data,
     );
   }
 
@@ -118,11 +107,11 @@ export class OrdersAPI {
   async updateShipment(
     shopId: string | number,
     trackingId: string | number,
-    data: UpdateShipmentRequest
+    data: UpdateShipmentRequest,
   ): Promise<Shipment> {
     return this.client.put<Shipment>(
       `/v3/application/shops/${shopId}/receipts/tracking/${trackingId}`,
-      data
+      data,
     );
   }
 
@@ -132,10 +121,10 @@ export class OrdersAPI {
    */
   async getReceiptShipments(
     shopId: string | number,
-    receiptId: string | number
+    receiptId: string | number,
   ): Promise<Shipment[]> {
     const response = await this.client.get<{ results: Shipment[] }>(
-      `/v3/application/shops/${shopId}/receipts/${receiptId}/shipments`
+      `/v3/application/shops/${shopId}/receipts/${receiptId}/shipments`,
     );
     return response.results;
   }
@@ -143,16 +132,13 @@ export class OrdersAPI {
   /**
    * Mark receipt as shipped (without tracking)
    */
-  async markAsShipped(
-    shopId: string | number,
-    receiptId: string | number
-  ): Promise<Receipt> {
+  async markAsShipped(shopId: string | number, receiptId: string | number): Promise<Receipt> {
     // In v3 API, this is done by creating a shipment without tracking
     await this.createShipment(shopId, receiptId, {
       // Minimal data for marking as shipped
       send_bcc: false,
     });
-    
+
     return this.getReceipt(shopId, receiptId);
   }
 
@@ -161,7 +147,7 @@ export class OrdersAPI {
    */
   async getOrderStats(
     shopId: string | number,
-    dateRange?: { start: Date; end: Date }
+    dateRange?: { start: Date; end: Date },
   ): Promise<{
     total_orders: number;
     unshipped_orders: number;
@@ -169,18 +155,18 @@ export class OrdersAPI {
     average_order_value: number;
   }> {
     const params: GetShopReceiptsRequest = {};
-    
+
     if (dateRange) {
       params.min_created = Math.floor(dateRange.start.getTime() / 1000);
       params.max_created = Math.floor(dateRange.end.getTime() / 1000);
     }
 
     const receipts = await this.getAllShopReceipts(shopId, params);
-    const unshippedReceipts = receipts.filter(r => !r.is_shipped);
-    
+    const unshippedReceipts = receipts.filter((r) => !r.is_shipped);
+
     let totalRevenue = 0;
     let currency = '';
-    
+
     for (const receipt of receipts) {
       totalRevenue += receipt.grandtotal?.amount || 0;
       if (!currency && receipt.grandtotal?.currency_code) {
@@ -204,14 +190,14 @@ export class OrdersAPI {
    */
   async batchMarkAsShipped(
     shopId: string | number,
-    receiptIds: (string | number)[]
+    receiptIds: (string | number)[],
   ): Promise<Array<{ receipt_id: string | number; success: boolean; error?: string }>> {
     const results = await Promise.allSettled(
-      receiptIds.map(receiptId => this.markAsShipped(shopId, receiptId))
+      receiptIds.map((receiptId) => this.markAsShipped(shopId, receiptId)),
     );
 
     return results.map((result, index) => ({
-      receipt_id: receiptIds[index],
+      receipt_id: receiptIds[index]!,
       success: result.status === 'fulfilled',
       error: result.status === 'rejected' ? result.reason?.message : undefined,
     }));

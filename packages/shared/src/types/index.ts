@@ -16,7 +16,7 @@ export {
   DateRangeParams,
   SearchParams,
   EtsyApiConfig,
-  RateLimitInfo
+  RateLimitInfo,
 } from './api';
 
 // Export everything from etsy-api.ts except conflicting types
@@ -30,9 +30,12 @@ export {
   Image,
   // Note: ShippingProfile is exported but may conflict with etsy-types
   ShippingProfile as EtsyShippingProfile,
-  TokenProvider
+  TokenProvider,
   // Note: Don't export Money as it conflicts with listing.ts
   // Note: Don't export ApiError, ApiResponse, RateLimitInfo, PaginationParams as they conflict with api.ts
 } from './etsy-api';
 
 // etsy-types is imported by SDK files directly, not re-exported here to avoid conflicts
+
+// Export all missing types needed by SDK
+export * from './missing-types';

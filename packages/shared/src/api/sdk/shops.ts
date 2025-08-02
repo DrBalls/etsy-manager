@@ -1,16 +1,17 @@
-import { EtsyApiClientV2 } from '../etsy-api-client-v2';
-import { 
-  Shop, 
-  ShopSection, 
-  ShopPolicies,
-  UpdateShopPoliciesRequest,
-  CreateShopSectionRequest,
-  UpdateShopSectionRequest,
-  ListShopSectionsRequest,
-  ShopAnnouncement,
-  UpdateShopRequest,
-  PaginatedResponse
+import {
+  type CreateShopSectionRequest,
+  type ExtendedShop,
+  type ListShopSectionsRequest,
+  type PaginatedResponse,
+  Shop,
+  type ShopAnnouncement,
+  type ShopPolicies,
+  type ShopSection,
+  type UpdateShopPoliciesRequest,
+  type UpdateShopRequest,
+  type UpdateShopSectionRequest,
 } from '../../types';
+import { type EtsyApiClientV2 } from '../etsy-api-client-v2';
 
 /**
  * Shop Management SDK methods
@@ -22,27 +23,24 @@ export class ShopsAPI {
    * Get shop details by shop ID
    * @see https://developers.etsy.com/documentation/reference/#operation/getShop
    */
-  async getShop(shopId: string | number): Promise<Shop> {
-    return this.client.get<Shop>(`/v3/application/shops/${shopId}`);
+  async getShop(shopId: string | number): Promise<ExtendedShop> {
+    return this.client.get<ExtendedShop>(`/v3/application/shops/${shopId}`);
   }
 
   /**
    * Get shop details by user ID
    * @see https://developers.etsy.com/documentation/reference/#operation/getShopByOwnerUserId
    */
-  async getShopByOwnerUserId(userId: string | number): Promise<Shop> {
-    return this.client.get<Shop>(`/v3/application/users/${userId}/shops`);
+  async getShopByOwnerUserId(userId: string | number): Promise<ExtendedShop> {
+    return this.client.get<ExtendedShop>(`/v3/application/users/${userId}/shops`);
   }
 
   /**
    * Update shop details
    * @see https://developers.etsy.com/documentation/reference/#operation/updateShop
    */
-  async updateShop(
-    shopId: string | number,
-    data: UpdateShopRequest
-  ): Promise<Shop> {
-    return this.client.put<Shop>(`/v3/application/shops/${shopId}`, data);
+  async updateShop(shopId: string | number, data: UpdateShopRequest): Promise<ExtendedShop> {
+    return this.client.put<ExtendedShop>(`/v3/application/shops/${shopId}`, data);
   }
 
   /**
@@ -51,23 +49,19 @@ export class ShopsAPI {
    */
   async getShopSections(
     shopId: string | number,
-    params?: ListShopSectionsRequest
+    params?: ListShopSectionsRequest,
   ): Promise<PaginatedResponse<ShopSection>> {
     return this.client.getPaginated<ShopSection>(
       `/v3/application/shops/${shopId}/sections`,
-      params
+      params,
     );
   }
 
   /**
    * Get all shop sections (handles pagination automatically)
    */
-  async getAllShopSections(
-    shopId: string | number
-  ): Promise<ShopSection[]> {
-    return this.client.getAllPages<ShopSection>(
-      `/v3/application/shops/${shopId}/sections`
-    );
+  async getAllShopSections(shopId: string | number): Promise<ShopSection[]> {
+    return this.client.getAllPages<ShopSection>(`/v3/application/shops/${shopId}/sections`);
   }
 
   /**
@@ -76,10 +70,10 @@ export class ShopsAPI {
    */
   async getShopSection(
     shopId: string | number,
-    shopSectionId: string | number
+    shopSectionId: string | number,
   ): Promise<ShopSection> {
     return this.client.get<ShopSection>(
-      `/v3/application/shops/${shopId}/sections/${shopSectionId}`
+      `/v3/application/shops/${shopId}/sections/${shopSectionId}`,
     );
   }
 
@@ -89,12 +83,9 @@ export class ShopsAPI {
    */
   async createShopSection(
     shopId: string | number,
-    data: CreateShopSectionRequest
+    data: CreateShopSectionRequest,
   ): Promise<ShopSection> {
-    return this.client.post<ShopSection>(
-      `/v3/application/shops/${shopId}/sections`,
-      data
-    );
+    return this.client.post<ShopSection>(`/v3/application/shops/${shopId}/sections`, data);
   }
 
   /**
@@ -104,11 +95,11 @@ export class ShopsAPI {
   async updateShopSection(
     shopId: string | number,
     shopSectionId: string | number,
-    data: UpdateShopSectionRequest
+    data: UpdateShopSectionRequest,
   ): Promise<ShopSection> {
     return this.client.put<ShopSection>(
       `/v3/application/shops/${shopId}/sections/${shopSectionId}`,
-      data
+      data,
     );
   }
 
@@ -116,13 +107,8 @@ export class ShopsAPI {
    * Delete a shop section
    * @see https://developers.etsy.com/documentation/reference/#operation/deleteShopSection
    */
-  async deleteShopSection(
-    shopId: string | number,
-    shopSectionId: string | number
-  ): Promise<void> {
-    await this.client.delete(
-      `/v3/application/shops/${shopId}/sections/${shopSectionId}`
-    );
+  async deleteShopSection(shopId: string | number, shopSectionId: string | number): Promise<void> {
+    await this.client.delete(`/v3/application/shops/${shopId}/sections/${shopSectionId}`);
   }
 
   /**
@@ -149,7 +135,7 @@ export class ShopsAPI {
    */
   async updateShopPolicies(
     shopId: string | number,
-    policies: UpdateShopPoliciesRequest
+    policies: UpdateShopPoliciesRequest,
   ): Promise<ShopPolicies> {
     const updateData: UpdateShopRequest = {};
 
@@ -192,7 +178,7 @@ export class ShopsAPI {
    */
   async updateShopAnnouncement(
     shopId: string | number,
-    announcement: string | null
+    announcement: string | null,
   ): Promise<ShopAnnouncement> {
     await this.updateShop(shopId, { sale_message: announcement || '' });
     return this.getShopAnnouncement(shopId);
@@ -223,7 +209,7 @@ export class ShopsAPI {
       is_vacation?: boolean;
       vacation_message?: string | null;
       vacation_autoreply?: string | null;
-    }
+    },
   ): Promise<void> {
     const updateData: UpdateShopRequest = {};
 
@@ -246,11 +232,8 @@ export class ShopsAPI {
    */
   async getFeaturedListings(
     shopId: string | number,
-    params?: { limit?: number; offset?: number }
+    params?: { limit?: number; offset?: number },
   ): Promise<any> {
-    return this.client.getPaginated(
-      `/v3/application/shops/${shopId}/listings/featured`,
-      params
-    );
+    return this.client.getPaginated(`/v3/application/shops/${shopId}/listings/featured`, params);
   }
 }

@@ -1,12 +1,12 @@
+import { type ExtendedApiClientConfig, type TokenProvider } from '../../types/etsy-api';
 import { EtsyApiClientV2 } from '../etsy-api-client-v2';
-import { TokenProvider, ExtendedApiClientConfig } from '../../types/etsy-api';
-import { ShopsAPI } from './shops';
-import { ListingsAPI } from './listings';
-import { InventoryAPI } from './inventory';
-import { OrdersAPI } from './orders';
-import { CustomersAPI } from './customers';
 import { AnalyticsAPI } from './analytics';
+import { CustomersAPI } from './customers';
+import { InventoryAPI } from './inventory';
+import { ListingsAPI } from './listings';
+import { OrdersAPI } from './orders';
 import { ShippingAPI } from './shipping';
+import { ShopsAPI } from './shops';
 import { TaxonomyAPI } from './taxonomy';
 import { UserAPI } from './user';
 
@@ -15,7 +15,7 @@ import { UserAPI } from './user';
  */
 export class EtsySDK {
   private client: EtsyApiClientV2;
-  
+
   // API modules
   public readonly shops: ShopsAPI;
   public readonly listings: ListingsAPI;
@@ -27,12 +27,9 @@ export class EtsySDK {
   public readonly taxonomy: TaxonomyAPI;
   public readonly user: UserAPI;
 
-  constructor(
-    config: ExtendedApiClientConfig,
-    tokenProvider: TokenProvider
-  ) {
+  constructor(config: ExtendedApiClientConfig, tokenProvider: TokenProvider) {
     this.client = new EtsyApiClientV2(config, tokenProvider);
-    
+
     // Initialize API modules
     this.shops = new ShopsAPI(this.client);
     this.listings = new ListingsAPI(this.client);
@@ -81,11 +78,11 @@ export class EtsySDK {
    * Batch operations helper
    */
   async batch<T>(
-    operations: Array<() => Promise<T>>
+    operations: Array<() => Promise<T>>,
   ): Promise<Array<{ success: boolean; data?: T; error?: Error }>> {
     const results = await Promise.allSettled(operations);
-    
-    return results.map(result => {
+
+    return results.map((result): { success: boolean; data?: T; error?: Error } => {
       if (result.status === 'fulfilled') {
         return { success: true, data: result.value };
       } else {
@@ -100,10 +97,10 @@ export class EtsySDK {
   async uploadFile(
     endpoint: string,
     file: File | Buffer | Blob,
-    additionalData?: Record<string, any>
+    additionalData?: Record<string, any>,
   ): Promise<any> {
     const formData = new FormData();
-    
+
     if (file instanceof File) {
       formData.append('file', file);
     } else if (file instanceof Blob) {
@@ -144,7 +141,7 @@ export * from './user';
 // Helper function to create SDK instance
 export function createEtsySDK(
   config: ExtendedApiClientConfig,
-  tokenProvider: TokenProvider
+  tokenProvider: TokenProvider,
 ): EtsySDK {
   return new EtsySDK(config, tokenProvider);
 }

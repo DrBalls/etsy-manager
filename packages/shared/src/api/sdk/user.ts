@@ -1,5 +1,5 @@
-import { EtsyApiClientV2 } from '../etsy-api-client-v2';
-import { User, Shop, PaginatedResponse } from '../../types';
+import { type ExtendedUser, type PaginatedResponse, type Shop, type User } from '../../types';
+import { type EtsyApiClientV2 } from '../etsy-api-client-v2';
 
 /**
  * User API SDK methods
@@ -11,16 +11,16 @@ export class UserAPI {
    * Get the authenticated user
    * @see https://developers.etsy.com/documentation/reference/#operation/getMe
    */
-  async getMe(): Promise<User> {
-    return this.client.get<User>('/v3/application/users/me');
+  async getMe(): Promise<ExtendedUser> {
+    return this.client.get<ExtendedUser>('/v3/application/users/me');
   }
 
   /**
    * Get a specific user
    * @see https://developers.etsy.com/documentation/reference/#operation/getUser
    */
-  async getUser(userId: string | number): Promise<User> {
-    return this.client.get<User>(`/v3/application/users/${userId}`);
+  async getUser(userId: string | number): Promise<ExtendedUser> {
+    return this.client.get<ExtendedUser>(`/v3/application/users/${userId}`);
   }
 
   /**
@@ -30,7 +30,7 @@ export class UserAPI {
   async getMyShops(): Promise<Shop[]> {
     const me = await this.getMe();
     const response = await this.client.get<{ results: Shop[] }>(
-      `/v3/application/users/${me.user_id}/shops`
+      `/v3/application/users/${me.user_id}/shops`,
     );
     return response.results;
   }
@@ -41,7 +41,7 @@ export class UserAPI {
    */
   async getUserShops(userId: string | number): Promise<Shop[]> {
     const response = await this.client.get<{ results: Shop[] }>(
-      `/v3/application/users/${userId}/shops`
+      `/v3/application/users/${userId}/shops`,
     );
     return response.results;
   }
@@ -55,11 +55,11 @@ export class UserAPI {
     params?: {
       limit?: number;
       offset?: number;
-    }
+    },
   ): Promise<PaginatedResponse<any>> {
     return this.client.getPaginated<any>(
       `/v3/application/users/${userId}/favorites/listings`,
-      params
+      params,
     );
   }
 
@@ -72,11 +72,11 @@ export class UserAPI {
     params?: {
       limit?: number;
       offset?: number;
-    }
+    },
   ): Promise<PaginatedResponse<Shop>> {
     return this.client.getPaginated<Shop>(
       `/v3/application/users/${userId}/favorites/shops`,
-      params
+      params,
     );
   }
 
@@ -87,7 +87,7 @@ export class UserAPI {
     try {
       // Try to get user info to verify auth is working
       await this.getMe();
-      
+
       // In a real implementation, you'd check the token's scopes
       // For now, we'll assume the scope is available if we can auth
       return true;
@@ -112,7 +112,7 @@ export class UserAPI {
   async getUserAddresses(userId?: string | number): Promise<any[]> {
     const targetUserId = userId || 'me';
     const response = await this.client.get<{ results: any[] }>(
-      `/v3/application/users/${targetUserId}/addresses`
+      `/v3/application/users/${targetUserId}/addresses`,
     );
     return response.results;
   }
@@ -140,13 +140,10 @@ export class UserAPI {
     params?: {
       limit?: number;
       offset?: number;
-    }
+    },
   ): Promise<PaginatedResponse<any>> {
     const targetUserId = userId || 'me';
-    return this.client.getPaginated<any>(
-      `/v3/application/users/${targetUserId}/receipts`,
-      params
-    );
+    return this.client.getPaginated<any>(`/v3/application/users/${targetUserId}/receipts`, params);
   }
 
   /**
@@ -158,12 +155,9 @@ export class UserAPI {
     params?: {
       limit?: number;
       offset?: number;
-    }
+    },
   ): Promise<PaginatedResponse<any>> {
-    return this.client.getPaginated<any>(
-      `/v3/application/users/${userId}/reviews`,
-      params
-    );
+    return this.client.getPaginated<any>(`/v3/application/users/${userId}/reviews`, params);
   }
 
   /**
@@ -176,15 +170,13 @@ export class UserAPI {
     member_since: Date;
   }> {
     const targetUserId = userId || 'me';
-    
+
     // Get user info
-    const user = targetUserId === 'me' 
-      ? await this.getMe()
-      : await this.getUser(targetUserId);
-    
+    const user = targetUserId === 'me' ? await this.getMe() : await this.getUser(targetUserId);
+
     // Get user's shops
     const shops = await this.getUserShops(user.user_id);
-    
+
     return {
       user,
       shops,

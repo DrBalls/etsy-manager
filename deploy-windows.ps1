@@ -27,12 +27,14 @@ if (Test-Command "docker") {
     try {
         docker info | Out-Null
         Write-Host "✓ Docker Desktop is running" -ForegroundColor Green
-    } catch {
+    }
+    catch {
         Write-Host "❌ Docker Desktop is not running!" -ForegroundColor Red
         Write-Host "Please start Docker Desktop and try again." -ForegroundColor Yellow
         exit 1
     }
-} else {
+}
+else {
     Write-Host "❌ Docker Desktop is not installed!" -ForegroundColor Red
     Write-Host "Please install from: https://docs.docker.com/desktop/install/windows-install/" -ForegroundColor Yellow
     exit 1
@@ -43,7 +45,8 @@ Write-Host "`n📦 Checking Node.js..." -ForegroundColor Yellow
 if (Test-Command "node") {
     $nodeVersion = node -v
     Write-Host "✓ Node.js $nodeVersion is installed" -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "❌ Node.js is not installed!" -ForegroundColor Red
     Write-Host "Please install from: https://nodejs.org/" -ForegroundColor Yellow
     exit 1
@@ -54,12 +57,14 @@ Write-Host "`n📦 Checking pnpm..." -ForegroundColor Yellow
 if (Test-Command "pnpm") {
     $pnpmVersion = pnpm -v
     Write-Host "✓ pnpm $pnpmVersion is installed" -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "Installing pnpm..." -ForegroundColor Yellow
     npm install -g pnpm@9.15.0
     if ($LASTEXITCODE -eq 0) {
         Write-Host "✓ pnpm installed successfully" -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "❌ Failed to install pnpm" -ForegroundColor Red
         exit 1
     }
@@ -79,11 +84,13 @@ if (-not (Test-Path ".env")) {
             notepad .env
             Read-Host "Press Enter when you've finished editing .env"
         }
-    } else {
+    }
+    else {
         Write-Host "❌ .env.docker.example not found!" -ForegroundColor Red
         exit 1
     }
-} else {
+}
+else {
     Write-Host "✓ .env file already exists" -ForegroundColor Green
 }
 
@@ -109,7 +116,8 @@ Write-Host "`n🏗️  Building applications..." -ForegroundColor Yellow
 pnpm build
 if ($LASTEXITCODE -ne 0) {
     Write-Host "⚠️  Build completed with warnings" -ForegroundColor Yellow
-} else {
+}
+else {
     Write-Host "✓ Build completed successfully" -ForegroundColor Green
 }
 
@@ -122,7 +130,8 @@ foreach ($port in $ports) {
     if ($connection) {
         $portsInUse += $port
         Write-Host "Port ${port}: In use" -ForegroundColor Yellow
-    } else {
+    }
+    else {
         Write-Host "Port ${port}: Available" -ForegroundColor Green
     }
 }
@@ -165,7 +174,8 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "   Stop:         docker-compose down" -ForegroundColor White
     Write-Host "   Restart:      docker-compose restart" -ForegroundColor White
     Write-Host "   Database UI:  cd apps\web && pnpm db:studio" -ForegroundColor White
-} else {
+}
+else {
     Write-Host "❌ Failed to start services" -ForegroundColor Red
     Write-Host "Check Docker Desktop and try again" -ForegroundColor Yellow
     exit 1

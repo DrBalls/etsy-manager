@@ -28,6 +28,7 @@ out
 # OS
 .DS_Store
 Thumbs.db
+*:Zone.Identifier
 
 # Debug
 npm-debug.log*

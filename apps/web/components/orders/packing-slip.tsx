@@ -2,7 +2,7 @@
 
 import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Printer } from 'lucide-react';
 import { format } from 'date-fns';
@@ -68,8 +68,6 @@ export function PackingSlip({ order, shopInfo }: PackingSlipProps) {
       }
     }
   };
-
-  const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   return (
     <div className="space-y-4">

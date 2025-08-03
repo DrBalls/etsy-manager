@@ -50,7 +50,10 @@ async function injectAnchor<T>(
       mountState
     })
   } else if (anchor.type === "inline") {
-    anchor.element.insertAdjacentElement(anchor.insertPosition || "afterend", shadowHost)
+    anchor.element.insertAdjacentElement(
+      anchor.insertPosition || "afterend",
+      shadowHost
+    )
   } else {
     document.documentElement.prepend(shadowHost)
   }
@@ -158,16 +161,18 @@ export function createAnchorObserver<T>(Mount: PlasmoCSUI<T>) {
 
     // Go through mounted sets and check if they are still mounted
     for (const el of mountState.hostSet) {
-      if (isMounted(el)) {
-        const anchor = mountState.hostMap.get(el)
-        if (!!anchor) {
-          if (anchor.type === "inline") {
-            mountedInlineAnchorSet.add(anchor.element)
-          } else if (anchor.type === "overlay") {
-            overlayHost = el
-          }
+      const anchor = mountState.hostMap.get(el)
+      const anchorExists = document.contains(anchor?.element)
+      if (isMounted(el) && anchorExists) {
+        if (anchor.type === "inline") {
+          mountedInlineAnchorSet.add(anchor.element)
+        } else if (anchor.type === "overlay") {
+          overlayHost = el
         }
       } else {
+        anchor.root?.unmount()
+        // Clean up the plasmo-csui element
+        el.remove()
         mountState.hostSet.delete(el)
       }
     }
@@ -182,11 +187,24 @@ export function createAnchorObserver<T>(Mount: PlasmoCSUI<T>) {
 
     const renderList: PlasmoCSUIAnchor[] = []
 
-    if (!!inlineAnchor && !mountedInlineAnchorSet.has(inlineAnchor)) {
-      renderList.push({
-        element: inlineAnchor,
-        type: "inline"
-      })
+    if (!!inlineAnchor) {
+      if (inlineAnchor instanceof Element) {
+        if (!mountedInlineAnchorSet.has(inlineAnchor)) {
+          renderList.push({
+            element: inlineAnchor,
+            type: "inline"
+          })
+        }
+      } else if (
+        inlineAnchor.element instanceof Element &&
+        !mountedInlineAnchorSet.has(inlineAnchor.element)
+      ) {
+        renderList.push({
+          element: inlineAnchor.element,
+          type: "inline",
+          insertPosition: inlineAnchor.insertPosition
+        })
+      }
     }
 
     if ((inlineAnchorList?.length || 0) > 0) {
@@ -198,6 +216,15 @@ export function createAnchorObserver<T>(Mount: PlasmoCSUI<T>) {
           renderList.push({
             element: inlineAnchor,
             type: "inline"
+          })
+        } else if (
+          inlineAnchor.element instanceof Element &&
+          !mountedInlineAnchorSet.has(inlineAnchor.element)
+        ) {
+          renderList.push({
+            element: inlineAnchor.element,
+            type: "inline",
+            insertPosition: inlineAnchor.insertPosition
           })
         }
       })

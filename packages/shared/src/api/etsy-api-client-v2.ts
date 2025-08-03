@@ -10,11 +10,13 @@ import {
 } from '../types/etsy-api';
 import { 
   ETSY_API_V3_BASE_URL, 
-  ETSY_RATE_LIMITS,
+  ETSY_RATE_LIMITS
+} from '../index';
+import {
   isRateLimitError,
   getRetryAfter,
   ExponentialBackoff
-} from '../index';
+} from '../utils/exponential-backoff';
 import { CacheProvider, MemoryCacheProvider } from './cache-provider';
 
 export interface ExtendedApiClientConfig extends ApiClientConfig {

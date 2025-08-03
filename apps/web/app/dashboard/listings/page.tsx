@@ -3,10 +3,10 @@ import { ShopRepository, ListingRepository } from '@/lib/repositories';
 import { ListingsClient } from './listings-client';
 
 export default async function ListingsPage() {
-  const user = await requireAuth();
+  const session = await requireAuth();
   
   // Get user's shops
-  const shops = await ShopRepository.findByUserId(user.id);
+  const shops = await ShopRepository.findByUserId(session.user.id);
   const primaryShop = shops[0];
 
   if (!primaryShop) {

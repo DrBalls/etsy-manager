@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth/auth-options';
 import { getEtsyApiClient } from '@/lib/api/etsy-api-client';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { shopId: string } }
 ) {
   try {

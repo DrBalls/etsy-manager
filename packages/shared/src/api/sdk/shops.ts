@@ -3,7 +3,6 @@ import {
   type ExtendedShop,
   type ListShopSectionsRequest,
   type PaginatedResponse,
-  Shop,
   type ShopAnnouncement,
   type ShopPolicies,
   type ShopSection,
@@ -158,7 +157,7 @@ export class ShopsAPI {
       updateData.policy_seller_info = policies.seller_info;
     }
 
-    const updatedShop = await this.updateShop(shopId, updateData);
+    await this.updateShop(shopId, updateData);
     return this.getShopPolicies(shopId);
   }
 
@@ -168,8 +167,8 @@ export class ShopsAPI {
   async getShopAnnouncement(shopId: string | number): Promise<ShopAnnouncement> {
     const shop = await this.getShop(shopId);
     return {
-      announcement: shop.sale_message || null,
-      updated_at: shop.updated_timestamp || 0,
+      sale_message: shop.sale_message || undefined,
+      updated_timestamp: shop.updated_timestamp || undefined,
     };
   }
 

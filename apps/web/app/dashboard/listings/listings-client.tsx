@@ -17,7 +17,7 @@ interface ListingsClientProps {
   shopId: string;
 }
 
-export function ListingsClient({ initialListings, shopId }: ListingsClientProps) {
+export function ListingsClient({ initialListings, shopId: _shopId }: ListingsClientProps) {
   const router = useRouter();
   const [listings, setListings] = useState(initialListings);
   const [filteredListings, setFilteredListings] = useState(initialListings);
@@ -59,7 +59,7 @@ export function ListingsClient({ initialListings, shopId }: ListingsClientProps)
 
     // Price range filter
     if (filters.priceRange !== 'all') {
-      const [min, max] = filters.priceRange.split('-').map(v => v === '+' ? Infinity : parseInt(v));
+      const [min, max] = filters.priceRange.split('-').map((v: string) => v === '+' ? Infinity : parseInt(v));
       filtered = filtered.filter(listing => {
         if (max === Infinity) return listing.price >= min;
         return listing.price >= min && listing.price <= max;

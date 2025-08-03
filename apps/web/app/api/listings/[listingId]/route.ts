@@ -21,14 +21,14 @@ const updateListingSchema = z.object({
 
 // GET /api/listings/[listingId]
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { listingId: string } }
 ) {
   try {
-    const user = await requireAuth();
+    const session = await requireAuth();
     const listing = await ListingRepository.findById(params.listingId);
 
-    if (!listing || listing.userId !== user.id) {
+    if (!listing || listing.userId !== session.user.id) {
       return NextResponse.json(
         { error: 'Listing not found' },
         { status: 404 }
@@ -51,10 +51,10 @@ export async function PATCH(
   { params }: { params: { listingId: string } }
 ) {
   try {
-    const user = await requireAuth();
+    const session = await requireAuth();
     const listing = await ListingRepository.findById(params.listingId);
 
-    if (!listing || listing.userId !== user.id) {
+    if (!listing || listing.userId !== session.user.id) {
       return NextResponse.json(
         { error: 'Listing not found' },
         { status: 404 }
@@ -87,14 +87,14 @@ export async function PATCH(
 
 // DELETE /api/listings/[listingId]
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { listingId: string } }
 ) {
   try {
-    const user = await requireAuth();
+    const session = await requireAuth();
     const listing = await ListingRepository.findById(params.listingId);
 
-    if (!listing || listing.userId !== user.id) {
+    if (!listing || listing.userId !== session.user.id) {
       return NextResponse.json(
         { error: 'Listing not found' },
         { status: 404 }

@@ -126,6 +126,26 @@ export class ShopRepository {
   }
 
   /**
+   * Get shop with user data (includes etsyAccessToken)
+   */
+  static async findByIdWithUser(id: string) {
+    return prisma.shop.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            etsyAccessToken: true,
+            etsyRefreshToken: true,
+            etsyTokenExpiresAt: true,
+          },
+        },
+      },
+    });
+  }
+
+  /**
    * Delete a shop and all related data
    */
   static async delete(id: string): Promise<Shop> {

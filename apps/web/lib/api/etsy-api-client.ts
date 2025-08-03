@@ -61,8 +61,8 @@ export function getEtsyApiClient(userId: string, config?: Partial<ExtendedApiCli
       redisClient = createRedisClient();
     }
 
-    // Create Redis cache provider
-    const cacheProvider = new RedisCacheProvider(redisClient, {
+    // Create Redis cache provider with type assertion to handle version mismatch
+    const cacheProvider = new RedisCacheProvider(redisClient as any, {
       keyPrefix: `etsy:web:${userId}:cache:`,
       defaultTTL: 300, // 5 minutes
     });
@@ -74,6 +74,7 @@ export function getEtsyApiClient(userId: string, config?: Partial<ExtendedApiCli
     const client = new EtsyApiClientV2(
       {
         apiKey: process.env.ETSY_CLIENT_ID!,
+        baseUrl: ETSY_API_V3_BASE_URL,
         cacheProvider,
         cache: {
           enabled: true,

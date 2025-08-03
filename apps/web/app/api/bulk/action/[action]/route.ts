@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { ListingRepository } from '@/lib/repositories/listing.repository';
 import { EtsyService } from '@/lib/services/etsy.service';
+import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
 const actionSchema = z.object({
@@ -27,6 +28,13 @@ export async function POST(
     // Get listings to verify ownership
     const listings = await ListingRepository.findByIds(listingIds, session.user.id);
     
+    // Get user's Etsy access token
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { etsyAccessToken: true }
+    });
+    const etsyAccessToken = user?.etsyAccessToken;
+    
     if (listings.length !== listingIds.length) {
       return NextResponse.json(
         { error: 'Some listings not found or unauthorized' },
@@ -49,15 +57,15 @@ export async function POST(
           try {
             await ListingRepository.update(listing.id, { state: 'ACTIVE' });
             
-            if (listing.shop.etsyAccessToken && listing.etsyListingId) {
-              const etsyService = new EtsyService(listing.shop.etsyAccessToken);
+            if (etsyAccessToken && listing.etsyListingId) {
+              const etsyService = new EtsyService(etsyAccessToken);
               await etsyService.updateListing(listing.etsyListingId, { state: 'active' });
             }
             
             results.processed++;
           } catch (error) {
             results.failed++;
-            results.errors.push(`Failed to activate listing ${listing.id}: ${error.message}`);
+            results.errors.push(`Failed to activate listing ${listing.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
           }
         }
         results.message = `Activated ${results.processed} listings`;
@@ -68,15 +76,15 @@ export async function POST(
           try {
             await ListingRepository.update(listing.id, { state: 'INACTIVE' });
             
-            if (listing.shop.etsyAccessToken && listing.etsyListingId) {
-              const etsyService = new EtsyService(listing.shop.etsyAccessToken);
+            if (etsyAccessToken && listing.etsyListingId) {
+              const etsyService = new EtsyService(etsyAccessToken);
               await etsyService.updateListing(listing.etsyListingId, { state: 'inactive' });
             }
             
             results.processed++;
           } catch (error) {
             results.failed++;
-            results.errors.push(`Failed to deactivate listing ${listing.id}: ${error.message}`);
+            results.errors.push(`Failed to deactivate listing ${listing.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
           }
         }
         results.message = `Deactivated ${results.processed} listings`;
@@ -85,21 +93,35 @@ export async function POST(
       case 'duplicate':
         for (const listing of listings) {
           try {
-            const { id, etsyListingId, createdAt, updatedAt, ...listingData } = listing;
-            
             // Create duplicate with modified title
-            const duplicate = await ListingRepository.create({
-              ...listingData,
-              title: `${listingData.title} (Copy)`,
+            await ListingRepository.create({
+              etsyListingId: `${listing.etsyListingId}-copy-${Date.now()}`, // Generate unique ID
+              shop: { connect: { id: listing.shopId } },
+              user: { connect: { id: listing.userId } },
+              title: `${listing.title} (Copy)`,
+              description: listing.description,
               state: 'DRAFT',
+              url: listing.url,
+              price: listing.price,
+              currencyCode: listing.currencyCode,
+              originalPrice: listing.originalPrice,
+              quantity: listing.quantity,
+              skuNumber: listing.skuNumber,
+              taxonomyId: listing.taxonomyId,
+              categoryPath: listing.categoryPath,
+              tags: listing.tags,
+              materials: listing.materials,
+              shopSection: listing.shopSectionId ? { connect: { id: listing.shopSectionId } } : undefined,
               views: 0,
-              favorites: 0,
+              favoritersCount: 0,
+              etsyCreatedAt: new Date(),
+              etsyUpdatedAt: new Date(),
             });
             
             results.processed++;
           } catch (error) {
             results.failed++;
-            results.errors.push(`Failed to duplicate listing ${listing.id}: ${error.message}`);
+            results.errors.push(`Failed to duplicate listing ${listing.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
           }
         }
         results.message = `Duplicated ${results.processed} listings`;
@@ -110,15 +132,15 @@ export async function POST(
           try {
             await ListingRepository.delete(listing.id);
             
-            if (listing.shop.etsyAccessToken && listing.etsyListingId) {
-              const etsyService = new EtsyService(listing.shop.etsyAccessToken);
+            if (etsyAccessToken && listing.etsyListingId) {
+              const etsyService = new EtsyService(etsyAccessToken);
               await etsyService.deleteListing(listing.etsyListingId);
             }
             
             results.processed++;
           } catch (error) {
             results.failed++;
-            results.errors.push(`Failed to delete listing ${listing.id}: ${error.message}`);
+            results.errors.push(`Failed to delete listing ${listing.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
           }
         }
         results.message = `Deleted ${results.processed} listings`;
@@ -127,8 +149,8 @@ export async function POST(
       case 'refresh':
         for (const listing of listings) {
           try {
-            if (listing.shop.etsyAccessToken && listing.etsyListingId) {
-              const etsyService = new EtsyService(listing.shop.etsyAccessToken);
+            if (etsyAccessToken && listing.etsyListingId) {
+              const etsyService = new EtsyService(etsyAccessToken);
               const etsyListing = await etsyService.getListing(listing.etsyListingId);
               
               await ListingRepository.update(listing.id, {
@@ -138,17 +160,17 @@ export async function POST(
                 quantity: etsyListing.quantity,
                 state: etsyListing.state.toUpperCase(),
                 views: etsyListing.views,
-                favorites: etsyListing.num_favorers,
+                favoritersCount: etsyListing.num_favorers,
                 tags: etsyListing.tags,
                 materials: etsyListing.materials,
-                lastSyncedAt: new Date(),
+                lastSyncAt: new Date(),
               });
             }
             
             results.processed++;
           } catch (error) {
             results.failed++;
-            results.errors.push(`Failed to refresh listing ${listing.id}: ${error.message}`);
+            results.errors.push(`Failed to refresh listing ${listing.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
           }
         }
         results.message = `Refreshed ${results.processed} listings from Etsy`;
@@ -161,7 +183,8 @@ export async function POST(
 
         for (const listing of listings) {
           try {
-            const currentPrice = listing.price || 0;
+            // Convert Decimal to number for calculations
+            const currentPrice = Number(listing.price) || 0;
             let newPrice = currentPrice;
             
             if (actionParams.type === 'percentage') {
@@ -182,15 +205,15 @@ export async function POST(
             
             await ListingRepository.update(listing.id, { price: newPrice });
             
-            if (listing.shop.etsyAccessToken && listing.etsyListingId) {
-              const etsyService = new EtsyService(listing.shop.etsyAccessToken);
+            if (etsyAccessToken && listing.etsyListingId) {
+              const etsyService = new EtsyService(etsyAccessToken);
               await etsyService.updateListing(listing.etsyListingId, { price: newPrice });
             }
             
             results.processed++;
           } catch (error) {
             results.failed++;
-            results.errors.push(`Failed to adjust price for listing ${listing.id}: ${error.message}`);
+            results.errors.push(`Failed to adjust price for listing ${listing.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
           }
         }
         results.message = `Adjusted prices for ${results.processed} listings`;
@@ -208,15 +231,15 @@ export async function POST(
             
             await ListingRepository.update(listing.id, { tags: newTags });
             
-            if (listing.shop.etsyAccessToken && listing.etsyListingId) {
-              const etsyService = new EtsyService(listing.shop.etsyAccessToken);
+            if (etsyAccessToken && listing.etsyListingId) {
+              const etsyService = new EtsyService(etsyAccessToken);
               await etsyService.updateListing(listing.etsyListingId, { tags: newTags });
             }
             
             results.processed++;
           } catch (error) {
             results.failed++;
-            results.errors.push(`Failed to add tags to listing ${listing.id}: ${error.message}`);
+            results.errors.push(`Failed to add tags to listing ${listing.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
           }
         }
         results.message = `Added tags to ${results.processed} listings`;
@@ -234,42 +257,42 @@ export async function POST(
             
             await ListingRepository.update(listing.id, { tags: newTags });
             
-            if (listing.shop.etsyAccessToken && listing.etsyListingId) {
-              const etsyService = new EtsyService(listing.shop.etsyAccessToken);
+            if (etsyAccessToken && listing.etsyListingId) {
+              const etsyService = new EtsyService(etsyAccessToken);
               await etsyService.updateListing(listing.etsyListingId, { tags: newTags });
             }
             
             results.processed++;
           } catch (error) {
             results.failed++;
-            results.errors.push(`Failed to remove tags from listing ${listing.id}: ${error.message}`);
+            results.errors.push(`Failed to remove tags from listing ${listing.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
           }
         }
         results.message = `Removed tags from ${results.processed} listings`;
         break;
 
       case 'change-shipping':
-        if (!actionParams || !actionParams.shippingTemplateId) {
-          throw new Error('Shipping template ID required');
+        if (!actionParams || !actionParams.shippingProfileId) {
+          throw new Error('Shipping profile ID required');
         }
 
         for (const listing of listings) {
           try {
             await ListingRepository.update(listing.id, { 
-              shippingTemplateId: actionParams.shippingTemplateId 
+              shippingProfile: { connect: { id: actionParams.shippingProfileId } }
             });
             
-            if (listing.shop.etsyAccessToken && listing.etsyListingId) {
-              const etsyService = new EtsyService(listing.shop.etsyAccessToken);
+            if (etsyAccessToken && listing.etsyListingId) {
+              const etsyService = new EtsyService(etsyAccessToken);
               await etsyService.updateListing(listing.etsyListingId, { 
-                shipping_template_id: actionParams.shippingTemplateId 
+                shipping_template_id: actionParams.shippingProfileId 
               });
             }
             
             results.processed++;
           } catch (error) {
             results.failed++;
-            results.errors.push(`Failed to update shipping for listing ${listing.id}: ${error.message}`);
+            results.errors.push(`Failed to update shipping for listing ${listing.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
           }
         }
         results.message = `Updated shipping template for ${results.processed} listings`;
@@ -286,7 +309,7 @@ export async function POST(
   } catch (error) {
     console.error('Bulk action error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to perform bulk action' },
+      { error: error instanceof Error ? error.message : 'Failed to perform bulk action' },
       { status: 500 }
     );
   }

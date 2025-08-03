@@ -54,7 +54,6 @@ export function BulkOperations({ listings, shopId }: BulkOperationsProps) {
       toast({
         title: 'No listings selected',
         description: 'Please select at least one listing to edit',
-        variant: 'destructive',
       });
       return;
     }
@@ -94,7 +93,7 @@ export function BulkOperations({ listings, shopId }: BulkOperationsProps) {
       });
 
       router.refresh();
-    } catch (error) {
+    } catch (error: any) {
       operation.status = 'failed';
       operation.message = 'Failed to update listings';
       operation.errors = [error.message];
@@ -102,7 +101,6 @@ export function BulkOperations({ listings, shopId }: BulkOperationsProps) {
       toast({
         title: 'Bulk edit failed',
         description: error.message,
-        variant: 'destructive',
       });
     } finally {
       setActiveOperation(null);
@@ -151,7 +149,7 @@ export function BulkOperations({ listings, shopId }: BulkOperationsProps) {
       });
 
       router.refresh();
-    } catch (error) {
+    } catch (error: any) {
       operation.status = 'failed';
       operation.message = 'Import failed';
       operation.errors = [error.message];
@@ -159,7 +157,6 @@ export function BulkOperations({ listings, shopId }: BulkOperationsProps) {
       toast({
         title: 'Import failed',
         description: error.message,
-        variant: 'destructive',
       });
     } finally {
       setActiveOperation(null);
@@ -176,7 +173,6 @@ export function BulkOperations({ listings, shopId }: BulkOperationsProps) {
       toast({
         title: 'No listings to export',
         description: 'Please select listings or enable "Export all"',
-        variant: 'destructive',
       });
       return;
     }
@@ -223,7 +219,7 @@ export function BulkOperations({ listings, shopId }: BulkOperationsProps) {
         title: 'Export completed',
         description: operation.message,
       });
-    } catch (error) {
+    } catch (error: any) {
       operation.status = 'failed';
       operation.message = 'Export failed';
       operation.errors = [error.message];
@@ -231,7 +227,6 @@ export function BulkOperations({ listings, shopId }: BulkOperationsProps) {
       toast({
         title: 'Export failed',
         description: error.message,
-        variant: 'destructive',
       });
     } finally {
       setActiveOperation(null);
@@ -244,7 +239,6 @@ export function BulkOperations({ listings, shopId }: BulkOperationsProps) {
       toast({
         title: 'No listings selected',
         description: 'Please select at least one listing',
-        variant: 'destructive',
       });
       return;
     }
@@ -285,7 +279,7 @@ export function BulkOperations({ listings, shopId }: BulkOperationsProps) {
       });
 
       router.refresh();
-    } catch (error) {
+    } catch (error: any) {
       operation.status = 'failed';
       operation.message = `Failed to perform ${action}`;
       operation.errors = [error.message];
@@ -293,7 +287,6 @@ export function BulkOperations({ listings, shopId }: BulkOperationsProps) {
       toast({
         title: 'Action failed',
         description: error.message,
-        variant: 'destructive',
       });
     } finally {
       setActiveOperation(null);
@@ -531,8 +524,7 @@ export function BulkOperations({ listings, shopId }: BulkOperationsProps) {
                       onClick={() => {
                         toast({
                           title: 'Operation Errors',
-                          description: op.errors.join('\n'),
-                          variant: 'destructive',
+                          description: op.errors?.join('\n') || 'Unknown error',
                         });
                       }}
                     >

@@ -22,7 +22,7 @@
     "@types/chrome": "^0.0.258",
     "@types/react": "18.2.48",
     "@types/react-dom": "18.2.18",
-    "plasmo": "0.84.0",
+    "plasmo": "0.90.5",
     "typescript": "5.5.4"
   },
   "manifest": {
@@ -34,20 +34,6 @@
       "tabs",
       "activeTab",
       "contextMenus"
-    ],
-    "action": {
-      "default_icon": {
-        "16": "icon16.png",
-        "32": "icon32.png",
-        "48": "icon48.png",
-        "128": "icon128.png"
-      }
-    },
-    "icons": {
-      "16": "icon16.png",
-      "32": "icon32.png",
-      "48": "icon48.png",
-      "128": "icon128.png"
-    }
+    ]
   }
 }

@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import {
   Table,
@@ -44,9 +43,6 @@ interface ListingsTableProps {
 }
 
 export function ListingsTable({ listings, selectedListings, onSelectionChange }: ListingsTableProps) {
-  const [sortBy, setSortBy] = useState<string>('updatedAt');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
       onSelectionChange(listings.map(l => l.id));

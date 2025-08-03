@@ -1,6 +1,5 @@
 import {
   type CreateShippingProfileRequest,
-  PaginatedResponse,
   type ShippingProfile,
   type ShippingProfileDestination,
   type ShippingProfileUpgrade,
@@ -214,10 +213,10 @@ export class ShippingAPI {
    * Calculate shipping costs for a listing
    */
   async calculateShippingCost(
-    listingId: string | number,
-    destinationCountryIso: string,
-    destinationRegion?: string,
-    destinationPostalCode?: string,
+    _listingId: string | number,
+    _destinationCountryIso: string,
+    _destinationRegion?: string,
+    _destinationPostalCode?: string,
   ): Promise<{
     primary_cost: { amount: number; currency: string };
     secondary_cost?: { amount: number; currency: string };
@@ -236,7 +235,7 @@ export class ShippingAPI {
    * Bulk assign shipping profile to listings
    */
   async bulkAssignShippingProfile(
-    shopId: string | number,
+    _shopId: string | number,
     shippingProfileId: string | number,
     listingIds: (string | number)[],
   ): Promise<Array<{ listing_id: string | number; success: boolean; error?: string }>> {

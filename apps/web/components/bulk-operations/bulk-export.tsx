@@ -7,7 +7,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Download, 
@@ -247,8 +246,7 @@ export function BulkExport({
               <div key={group} className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Checkbox
-                    checked={isGroupSelected}
-                    indeterminate={isGroupPartial}
+                    checked={isGroupSelected || isGroupPartial}
                     onCheckedChange={() => handleGroupToggle(group)}
                   />
                   <Label className="font-medium cursor-pointer">

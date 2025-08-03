@@ -60,10 +60,7 @@ export async function POST(request: NextRequest) {
 
     const result = await OrderSyncService.syncShopOrders(shopId);
     
-    return NextResponse.json({
-      success: true,
-      ...result,
-    });
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Manual sync error:', error);
     return NextResponse.json(

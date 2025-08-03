@@ -78,11 +78,14 @@ export class CustomersAPI {
    * Note: Messages are typically included in the conversation object
    */
   async getConversationMessages(
-    shopId: string | number,
-    conversationId: string | number
+    _shopId: string | number,
+    _conversationId: string | number
   ): Promise<ConversationMessage[]> {
-    const conversation = await this.getConversation(shopId, conversationId);
-    return conversation.messages || [];
+    // Note: The Etsy API v3 doesn't provide a direct endpoint for conversation messages
+    // This would require the v2 API or a different approach
+    // For now, returning empty array - implement when API supports it
+    console.warn('getConversationMessages: Etsy API v3 does not support fetching messages directly');
+    return [];
   }
 
   /**

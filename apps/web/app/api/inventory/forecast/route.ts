@@ -6,7 +6,7 @@ import { subDays, addDays } from 'date-fns';
 // GET /api/inventory/forecast
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth();
+    const session = await requireAuth();
     const searchParams = request.nextUrl.searchParams;
     const shopId = searchParams.get('shopId');
 
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
     // Verify user owns the shop
     const shop = await ShopRepository.findById(shopId);
-    if (!shop || shop.userId !== user.id) {
+    if (!shop || shop.userId !== session.user.id) {
       return NextResponse.json(
         { error: 'Shop not found' },
         { status: 404 }
@@ -49,14 +49,14 @@ export async function GET(request: NextRequest) {
 
         // Calculate days until stockout
         const daysUntilStockout = averageDailySales > 0 
-          ? Math.floor(item.availableQuantity / averageDailySales)
+          ? Math.floor(item.quantity / averageDailySales)
           : 999; // If no sales, set to high number
 
         // Calculate estimated stockout date
         const estimatedStockoutDate = addDays(new Date(), daysUntilStockout);
 
         // Lead time (could be configured per product, using default)
-        const leadTimeDays = item.listing?.processingMax || 7;
+        const leadTimeDays = 7; // Default lead time
 
         // Calculate recommended reorder date (stockout date - lead time - buffer)
         const bufferDays = 3; // Safety buffer
@@ -70,7 +70,6 @@ export async function GET(request: NextRequest) {
           listing: {
             id: item.listing?.id || '',
             title: item.listing?.title || 'Unknown Product',
-            images: item.listing?.images,
           },
           currentStock: item.quantity,
           averageDailySales,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth/utils';
-import { InventoryRepository, InventoryLogRepository } from '@/lib/repositories';
+import { InventoryRepository } from '@/lib/repositories';
 import { z } from 'zod';
 
 const adjustInventorySchema = z.object({
@@ -14,10 +14,10 @@ export async function POST(
   { params }: { params: { inventoryId: string } }
 ) {
   try {
-    const user = await requireAuth();
-    const item = await InventoryRepository.findById(params.inventoryId);
+    const session = await requireAuth();
+    const item = await InventoryRepository.findByIdWithListing(params.inventoryId);
 
-    if (!item || item.listing?.userId !== user.id) {
+    if (!item || item.listing.userId !== session.user.id) {
       return NextResponse.json(
         { error: 'Inventory item not found' },
         { status: 404 }
@@ -25,30 +25,28 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { adjustment, reason } = adjustInventorySchema.parse(body);
+    const { adjustment } = adjustInventorySchema.parse(body);
 
     // Calculate new quantity
     const oldQuantity = item.quantity;
     const newQuantity = Math.max(0, oldQuantity + adjustment);
     
     // Update inventory
-    const updatedItem = await InventoryRepository.update(params.inventoryId, {
-      quantity: newQuantity,
-      availableQuantity: newQuantity - (item.reservedQuantity || 0),
-      updatedAt: new Date(),
-    });
+    const updatedItem = await InventoryRepository.updateQuantity(
+      params.inventoryId,
+      newQuantity
+    );
 
-    // Create inventory log
-    await InventoryLogRepository.create({
-      inventoryItemId: params.inventoryId,
-      listingId: item.listingId,
-      userId: user.id,
-      changeType: adjustment > 0 ? 'adjustment_increase' : 'adjustment_decrease',
-      quantityChange: adjustment,
-      previousQuantity: oldQuantity,
-      newQuantity: newQuantity,
-      reason: reason || 'Manual adjustment',
-    });
+    // TODO: Implement inventory logging when InventoryLog model is added to schema
+    // await InventoryLogRepository.create({
+    //   inventoryId: params.inventoryId,
+    //   type: 'ADJUSTMENT',
+    //   quantityBefore: oldQuantity,
+    //   quantityAfter: newQuantity,
+    //   adjustment: adjustment,
+    //   userId: session.user.id,
+    //   reason: reason || 'Manual adjustment',
+    // });
 
     return NextResponse.json(updatedItem);
   } catch (error) {

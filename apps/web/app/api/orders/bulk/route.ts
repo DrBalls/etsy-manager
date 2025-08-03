@@ -5,7 +5,7 @@ import { EtsyClient } from '@/lib/etsy/client';
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth();
+    const session = await requireAuth();
     const { action, orderIds } = await request.json();
 
     if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       where: {
         id: { in: orderIds },
         shop: {
-          userId: user.id,
+          userId: session.user.id,
         },
       },
       include: {
@@ -53,10 +53,15 @@ export async function POST(request: NextRequest) {
         });
 
         // Sync with Etsy
-        for (const order of orders) {
-          if (order.shop.etsyAccessToken) {
+        const user = await prisma.user.findUnique({
+          where: { id: session.user.id },
+          select: { etsyAccessToken: true },
+        });
+
+        if (user?.etsyAccessToken) {
+          for (const order of orders) {
             try {
-              const etsyClient = new EtsyClient(order.shop.etsyAccessToken);
+              const etsyClient = new EtsyClient(user.etsyAccessToken);
               await etsyClient.updateShipmentStatus(
                 order.shop.etsyShopId,
                 order.etsyOrderId

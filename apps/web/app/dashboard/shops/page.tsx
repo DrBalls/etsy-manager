@@ -7,10 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Store, ExternalLink, Settings } from 'lucide-react';
 
 export default async function ShopsPage() {
-  const user = await requireAuth();
+  const session = await requireAuth();
   
   // Get user's shops
-  const shops = await ShopRepository.findByUserId(user.id);
+  const shops = await ShopRepository.findByUserId(session.user.id);
 
   return (
     <div className="space-y-6">

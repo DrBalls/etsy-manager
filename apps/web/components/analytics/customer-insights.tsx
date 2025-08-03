@@ -1,7 +1,6 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Users, UserPlus, UserCheck, DollarSign } from 'lucide-react';
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
@@ -132,7 +131,7 @@ export function CustomerInsights({
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {topCustomers.slice(0, 5).map((customer, index) => (
+              {topCustomers.slice(0, 5).map((customer) => (
                 <div key={customer.id} className="flex items-center">
                   <div className="flex-1 space-y-1">
                     <p className="text-sm font-medium leading-none">

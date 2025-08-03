@@ -11,8 +11,8 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function NewListingPage() {
-  const user = await requireAuth();
-  const shops = await ShopRepository.findByUserId(user.id);
+  const session = await requireAuth();
+  const shops = await ShopRepository.findByUserId(session.user.id);
   const primaryShop = shops[0];
 
   if (!primaryShop) {

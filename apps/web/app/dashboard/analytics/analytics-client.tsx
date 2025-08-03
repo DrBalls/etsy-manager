@@ -4,13 +4,6 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { OverviewChart } from '@/components/analytics/overview-chart';
 import { RevenueChart } from '@/components/analytics/revenue-chart';
@@ -30,7 +23,6 @@ import {
   Download,
   RefreshCw,
 } from 'lucide-react';
-import { format } from 'date-fns';
 import { toast } from 'sonner';
 
 interface AnalyticsClientProps {
@@ -53,9 +45,15 @@ export function AnalyticsClient({
   trafficSources,
 }: AnalyticsClientProps) {
   const [dateRange, setDateRange] = useState({ from: new Date(), to: new Date() });
-  const [compareMode, setCompareMode] = useState(false);
+  const [compareMode, _setCompareMode] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleDateChange = (date: any) => {
+    if (date?.from && date?.to) {
+      setDateRange({ from: date.from, to: date.to });
+    }
+  };
 
   const calculateChange = (current: number, previous: number) => {
     if (previous === 0) return current > 0 ? 100 : 0;
@@ -119,7 +117,7 @@ export function AnalyticsClient({
         <div className="flex items-center gap-2">
           <DateRangePicker
             date={dateRange}
-            onDateChange={setDateRange}
+            onDateChange={handleDateChange}
           />
           <Button
             variant="outline"

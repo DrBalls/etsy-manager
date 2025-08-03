@@ -8,7 +8,7 @@ export async function PATCH(
   { params }: { params: { orderId: string } }
 ) {
   try {
-    const user = await requireAuth();
+    const session = await requireAuth();
     const { trackingNumber, trackingCarrier, status } = await request.json();
 
     // Get order and verify ownership
@@ -16,7 +16,7 @@ export async function PATCH(
       where: {
         id: params.orderId,
         shop: {
-          userId: user.id,
+          userId: session.user.id,
         },
       },
       include: {
@@ -44,9 +44,14 @@ export async function PATCH(
     });
 
     // Sync tracking with Etsy
-    if (order.shop.etsyAccessToken) {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { etsyAccessToken: true },
+    });
+
+    if (user?.etsyAccessToken) {
       try {
-        const etsyClient = new EtsyClient(order.shop.etsyAccessToken);
+        const etsyClient = new EtsyClient(user.etsyAccessToken);
         await etsyClient.addTrackingNumber(
           order.shop.etsyShopId,
           order.etsyOrderId,

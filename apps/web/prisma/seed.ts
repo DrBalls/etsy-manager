@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { ListingState, OrderStatus } from '../types/db';
+import { ListingState } from '../types/db';
 import { hashPassword } from '../lib/auth/utils';
 
 const prisma = new PrismaClient();
@@ -122,7 +122,9 @@ async function main() {
   // Create test orders
   const orders = [];
   for (let i = 1; i <= 5; i++) {
-    const customerId = customers[i % customers.length].id;
+    const customer = customers[i % customers.length];
+    if (!customer) continue;
+    const customerId = customer.id;
     const order = await prisma.order.create({
       data: {
         etsyReceiptId: `test-receipt-${i}`,
@@ -151,6 +153,7 @@ async function main() {
 
     // Add order items
     const listing = listings[i % listings.length];
+    if (!listing) continue;
     await prisma.orderItem.create({
       data: {
         orderId: order.id,

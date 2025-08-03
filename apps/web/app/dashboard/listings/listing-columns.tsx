@@ -1,7 +1,7 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { Listing, ListingState } from '@/types/db';
+import { ListingWithImages, ListingState } from '@/types/db';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,12 +18,11 @@ import { formatDistanceToNow } from 'date-fns';
 const stateColors: Record<ListingState, string> = {
   [ListingState.ACTIVE]: 'bg-green-100 text-green-800',
   [ListingState.INACTIVE]: 'bg-gray-100 text-gray-800',
-  [ListingState.SOLD_OUT]: 'bg-red-100 text-red-800',
   [ListingState.DRAFT]: 'bg-yellow-100 text-yellow-800',
   [ListingState.EXPIRED]: 'bg-orange-100 text-orange-800',
 };
 
-export const ListingColumns: ColumnDef<Listing>[] = [
+export const ListingColumns: ColumnDef<ListingWithImages>[] = [
   {
     accessorKey: 'title',
     header: 'Title',
@@ -41,7 +40,7 @@ export const ListingColumns: ColumnDef<Listing>[] = [
           <div>
             <div className="font-medium">{listing.title}</div>
             <div className="text-sm text-muted-foreground">
-              SKU: {listing.sku || 'N/A'}
+              SKU: {listing.skuNumber || 'N/A'}
             </div>
           </div>
         </div>
@@ -64,12 +63,12 @@ export const ListingColumns: ColumnDef<Listing>[] = [
     accessorKey: 'price',
     header: 'Price',
     cell: ({ row }) => {
-      const price = parseFloat(row.getValue('price'));
+      const price = row.getValue('price');
       const currency = row.original.currencyCode;
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: currency,
-      }).format(price);
+      }).format(Number(price));
     },
   },
   {
@@ -106,9 +105,7 @@ export const ListingColumns: ColumnDef<Listing>[] = [
   },
   {
     id: 'actions',
-    cell: ({ row }) => {
-      const listing = row.original;
-
+    cell: () => {
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

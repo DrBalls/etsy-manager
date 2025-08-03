@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -21,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ShoppingCart, Package, Truck, CheckCircle, Clock, Search, Filter, Download, Printer } from 'lucide-react';
+import { ShoppingCart, Package, Truck, CheckCircle, Clock, Search, Download, Printer } from 'lucide-react';
 import { format } from 'date-fns';
 import { OrderDetailsDialog } from '@/components/orders/order-details-dialog';
 import { BulkOrderActions } from '@/components/orders/bulk-order-actions';
@@ -33,13 +32,13 @@ interface Order {
   orderNumber: string;
   status: string;
   buyerName: string;
-  buyerEmail: string;
+  buyerEmail: string | null;
   totalAmount: number;
   currencyCode: string;
-  shippingMethod?: string;
-  trackingNumber?: string;
+  shippingMethod?: string | null;
+  trackingNumber?: string | null;
   orderDate: Date;
-  shipByDate?: Date;
+  shipByDate?: Date | null;
   items: Array<{
     id: string;
     listingId: string;
@@ -53,12 +52,12 @@ interface Order {
   shippingAddress?: {
     name: string;
     line1: string;
-    line2?: string;
+    line2?: string | null;
     city: string;
-    state?: string;
+    state?: string | null;
     postalCode: string;
     country: string;
-  };
+  } | null;
 }
 
 interface OrderStats {
@@ -76,7 +75,7 @@ interface OrdersClientProps {
   shopId: string;
 }
 
-export function OrdersClient({ initialOrders, orderStats, shopId }: OrdersClientProps) {
+export function OrdersClient({ initialOrders, orderStats, shopId: _shopId }: OrdersClientProps) {
   const [orders, setOrders] = useState(initialOrders);
   const [filteredOrders, setFilteredOrders] = useState(initialOrders);
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
@@ -109,7 +108,7 @@ export function OrdersClient({ initialOrders, orderStats, shopId }: OrdersClient
       filtered = filtered.filter(order =>
         order.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
         order.buyerName.toLowerCase().includes(search.toLowerCase()) ||
-        order.buyerEmail.toLowerCase().includes(search.toLowerCase())
+        (order.buyerEmail && order.buyerEmail.toLowerCase().includes(search.toLowerCase()))
       );
     }
 
@@ -367,7 +366,7 @@ export function OrdersClient({ initialOrders, orderStats, shopId }: OrdersClient
                   <TableCell>
                     <div>
                       <p className="font-medium">{order.buyerName}</p>
-                      <p className="text-xs text-muted-foreground">{order.buyerEmail}</p>
+                      <p className="text-xs text-muted-foreground">{order.buyerEmail || 'No email'}</p>
                     </div>
                   </TableCell>
                   <TableCell>

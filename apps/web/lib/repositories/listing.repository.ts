@@ -239,7 +239,7 @@ export class ListingRepository {
   static async findByIds(
     ids: string[],
     userId: string
-  ): Promise<(Listing & { shop: { id: string; userId: string; etsyAccessToken: string | null } })[]> {
+  ): Promise<(Listing & { shop: { id: string; userId: string } })[]> {
     return prisma.listing.findMany({
       where: {
         id: { in: ids },
@@ -250,7 +250,6 @@ export class ListingRepository {
           select: {
             id: true,
             userId: true,
-            etsyAccessToken: true,
           },
         },
       },

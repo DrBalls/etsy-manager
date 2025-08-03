@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-08-02T19:34:56.184Z",
+  "summary": "\n🎯 Autonomous Test Generation Summary\n====================================\n\n📊 Files Processed: 1\n✅ Total Tests Generated: 3\n✅ Tests Passed: 0\n❌ Tests Failed: 3\n🔧 Tests Self-Healed: 0\n⚠️  Files with Errors: 0\n\n📈 Success Rate: 0.00%\n🔧 Self-Healing Rate: 0.00%\n\n\n❌ Failed Files:\n  - apps/web/lib/auth/utils.ts: \n",
+  "results": [
+    {
+      "file": "apps/web/lib/auth/utils.ts",
+      "passed": false,
+      "testsGenerated": 3,
+      "testsPassed": 0,
+      "testsFailed": 3,
+      "errors": [],
+      "selfHealed": false
+    }
+  ]
+}

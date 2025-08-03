@@ -119,6 +119,12 @@ model Listing {
   shopSectionId     String?
   shopSection       ShopSection? @relation(fields: [shopSectionId], references: [id])
   
+  // Shipping
+  shippingProfileId String?
+  shippingProfile   ShippingProfile? @relation(fields: [shippingProfileId], references: [id])
+  processingTimeMin Int?
+  processingTimeMax Int?
+  
   // Stats
   views             Int       @default(0)
   favoritersCount   Int       @default(0)
@@ -359,6 +365,9 @@ model ShippingProfile {
   
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+  
+  // Relations
+  listings              Listing[]
   
   @@index([shopId])
 }

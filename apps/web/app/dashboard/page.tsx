@@ -14,13 +14,12 @@ import {
   Users,
   Eye,
 } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
 
 export default async function DashboardPage() {
-  const user = await requireAuth();
+  const session = await requireAuth();
 
   // Fetch user's shops
-  const shops = await ShopRepository.findByUserId(user.id);
+  const shops = await ShopRepository.findByUserId(session.user.id);
   const primaryShop = shops[0];
 
   // If no shop is connected yet
@@ -30,7 +29,7 @@ export default async function DashboardPage() {
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">
-            Welcome back, {user.name || user.email}!
+            Welcome back, {session.user.name || session.user.email}!
           </p>
         </div>
         <div className="rounded-lg border border-dashed p-8 text-center">
@@ -50,15 +49,23 @@ export default async function DashboardPage() {
   }
 
   // Fetch dashboard data
-  const [recentOrders, activeListings, analytics, recentActivities] = await Promise.all([
+  // Calculate date range for last 30 days
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - 30);
+  
+  const [_recentOrders, allListings, analytics, recentActivities] = await Promise.all([
     OrderRepository.findByShopId(primaryShop.id, { limit: 5 }),
-    ListingRepository.findByShopId(primaryShop.id, { state: 'ACTIVE' }),
-    AnalyticsRepository.getShopAnalytics(primaryShop.id, 30),
-    getRecentActivities(user.id, primaryShop.id),
+    ListingRepository.findByShopId(primaryShop.id),
+    AnalyticsRepository.findByDateRange(primaryShop.id, { start: startDate, end: endDate }),
+    getRecentActivities(session.user.id, primaryShop.id),
   ]);
+  
+  // Filter for active listings
+  const activeListings = allListings.filter(listing => listing.state === 'active');
 
   // Calculate stats
-  const totalRevenue = analytics.reduce((sum, day) => sum + day.revenue, 0);
+  const totalRevenue = analytics.reduce((sum, day) => sum + Number(day.revenue), 0);
   const totalOrders = analytics.reduce((sum, day) => sum + day.orders, 0);
   const totalViews = analytics.reduce((sum, day) => sum + day.pageViews, 0);
   const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
@@ -66,7 +73,7 @@ export default async function DashboardPage() {
   // Prepare chart data
   const chartData = analytics.slice(-14).map((day) => ({
     date: new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    revenue: day.revenue,
+    revenue: Number(day.revenue),
     orders: day.orders,
   }));
 
@@ -145,7 +152,7 @@ export default async function DashboardPage() {
   );
 }
 
-async function getRecentActivities(userId: string, shopId: string) {
+async function getRecentActivities(_userId: string, shopId: string) {
   // In a real app, this would fetch from an activity log table
   // For now, we'll create some mock data
   const orders = await OrderRepository.findByShopId(shopId, { limit: 3 });
@@ -154,7 +161,7 @@ async function getRecentActivities(userId: string, shopId: string) {
     id: order.id,
     type: 'order' as const,
     title: `New order #${order.orderNumber}`,
-    description: `${order.orderItems.length} items - $${order.total.toFixed(2)}`,
+    description: `${order.items.length} items - $${Number(order.totalAmount).toFixed(2)}`,
     timestamp: order.createdAt,
   }));
 }

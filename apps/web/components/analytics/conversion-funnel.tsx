@@ -26,8 +26,9 @@ export function ConversionFunnel({
     <div className="space-y-4">
       {stages.map((stage, index) => {
         const percentage = (stage.value / maxValue) * 100;
-        const dropoffRate = index > 0 ? 
-          ((stages[index - 1].value - stage.value) / stages[index - 1].value) * 100 : 0;
+        const previousStage = stages[index - 1];
+        const dropoffRate = index > 0 && previousStage ? 
+          ((previousStage.value - stage.value) / previousStage.value) * 100 : 0;
 
         return (
           <div key={stage.name} className="space-y-2">

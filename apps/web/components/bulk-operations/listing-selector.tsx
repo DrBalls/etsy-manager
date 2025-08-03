@@ -22,7 +22,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Search, Filter, CheckSquare, Square } from 'lucide-react';
+import { Search, CheckSquare, Square } from 'lucide-react';
 
 interface ListingSelectorProps {
   listings: Listing[];
@@ -43,8 +43,8 @@ export function ListingSelector({
   const categories = useMemo(() => {
     const cats = new Set<string>();
     listings.forEach(listing => {
-      if (listing.categoryPath) {
-        cats.add(listing.categoryPath.split('/')[0]);
+      if (listing.categoryPath && listing.categoryPath.length > 0 && listing.categoryPath[0]) {
+        cats.add(listing.categoryPath[0]);
       }
     });
     return Array.from(cats).sort();
@@ -56,8 +56,7 @@ export function ListingSelector({
     // Apply search filter
     if (searchQuery) {
       filtered = filtered.filter(listing =>
-        listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        listing.sku?.toLowerCase().includes(searchQuery.toLowerCase())
+        listing.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -69,7 +68,7 @@ export function ListingSelector({
     // Apply category filter
     if (categoryFilter !== 'all') {
       filtered = filtered.filter(listing =>
-        listing.categoryPath?.startsWith(categoryFilter)
+        listing.categoryPath && listing.categoryPath[0]?.startsWith(categoryFilter)
       );
     }
 
@@ -79,7 +78,7 @@ export function ListingSelector({
         case 'title':
           return a.title.localeCompare(b.title);
         case 'price':
-          return (a.price || 0) - (b.price || 0);
+          return (a.price?.toNumber() || 0) - (b.price?.toNumber() || 0);
         case 'quantity':
           return a.quantity - b.quantity;
         case 'views':
@@ -123,12 +122,12 @@ export function ListingSelector({
       case 'low-stock':
         selected = listings.filter(l => l.quantity < 5).map(l => l.id);
         break;
-      case 'no-images':
-        selected = listings.filter(l => !l.images || l.images.length === 0).map(l => l.id);
-        break;
+      // case 'no-images':
+      //   selected = listings.filter(l => !l.images || l.images.length === 0).map(l => l.id);
+      //   break;
       case 'high-price':
-        const avgPrice = listings.reduce((sum, l) => sum + (l.price || 0), 0) / listings.length;
-        selected = listings.filter(l => (l.price || 0) > avgPrice * 1.5).map(l => l.id);
+        const avgPrice = listings.reduce((sum, l) => sum + (l.price?.toNumber() || 0), 0) / listings.length;
+        selected = listings.filter(l => (l.price?.toNumber() || 0) > avgPrice * 1.5).map(l => l.id);
         break;
     }
 
@@ -230,13 +229,6 @@ export function ListingSelector({
         >
           Select Low Stock
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handleSelectByCondition('no-images')}
-        >
-          Select No Images
-        </Button>
       </div>
 
       {/* Listings Table */}
@@ -272,7 +264,7 @@ export function ListingSelector({
                     />
                   </TableCell>
                   <TableCell className="font-medium">{listing.title}</TableCell>
-                  <TableCell>{listing.sku || '-'}</TableCell>
+                  <TableCell>{listing.skuNumber || '-'}</TableCell>
                   <TableCell>
                     <Badge
                       variant={

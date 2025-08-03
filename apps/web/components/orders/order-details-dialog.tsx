@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Package, Truck, MapPin, CreditCard, MessageSquare, Clock, CheckCircle, Printer, Copy } from 'lucide-react';
+import { Package, Truck, MessageSquare, Clock, CheckCircle, Printer, Copy } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 

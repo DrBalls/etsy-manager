@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
             row['Quantity'] = listing.quantity;
             break;
           case 'sku':
-            row['SKU'] = listing.sku || '';
+            row['SKU'] = listing.skuNumber || '';
             break;
           case 'state':
             row['State'] = listing.state;
@@ -78,25 +78,25 @@ export async function POST(request: NextRequest) {
             row['Category Path'] = listing.categoryPath || '';
             break;
           case 'who_made':
-            row['Who Made'] = listing.whoMade || '';
+            row['Who Made'] = '';
             break;
           case 'when_made':
-            row['When Made'] = listing.whenMade || '';
+            row['When Made'] = '';
             break;
           case 'is_vintage':
-            row['Is Vintage'] = listing.isVintage ? 'true' : 'false';
+            row['Is Vintage'] = 'false';
             break;
           case 'is_supply':
-            row['Is Supply'] = listing.isSupply ? 'true' : 'false';
+            row['Is Supply'] = 'false';
             break;
           case 'views':
             row['Views'] = listing.views;
             break;
           case 'favorites':
-            row['Favorites'] = listing.favorites;
+            row['Favorites'] = listing.favoritersCount;
             break;
           case 'featured_rank':
-            row['Featured Rank'] = listing.featuredRank || '';
+            row['Featured Rank'] = '';
             break;
           case 'created_at':
             row['Created Date'] = new Date(listing.createdAt).toISOString();
@@ -105,21 +105,21 @@ export async function POST(request: NextRequest) {
             row['Updated Date'] = new Date(listing.updatedAt).toISOString();
             break;
           case 'last_synced_at':
-            row['Last Synced'] = listing.lastSyncedAt 
-              ? new Date(listing.lastSyncedAt).toISOString() 
+            row['Last Synced'] = listing.lastSyncAt 
+              ? new Date(listing.lastSyncAt).toISOString() 
               : '';
             break;
           case 'shipping_template_id':
-            row['Shipping Template ID'] = listing.shippingTemplateId || '';
+            row['Shipping Template ID'] = listing.shippingProfileId || '';
             break;
           case 'shipping_profile_id':
             row['Shipping Profile ID'] = listing.shippingProfileId || '';
             break;
           case 'images':
-            row['Image URLs'] = listing.images?.join(', ') || '';
+            row['Image URLs'] = '';
             break;
           case 'image_count':
-            row['Image Count'] = listing.images?.length || 0;
+            row['Image Count'] = 0;
             break;
         }
       });
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Bulk export error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to export listings' },
+      { error: error instanceof Error ? error.message : 'Failed to export listings' },
       { status: 500 }
     );
   }

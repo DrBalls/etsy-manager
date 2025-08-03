@@ -116,8 +116,8 @@ export class AnalyticsAPI {
    * Get listing performance metrics
    */
   async getListingPerformance(
-    listingId: string | number,
-    dateRange?: { start: Date; end: Date }
+    _listingId: string | number,
+    _dateRange?: { start: Date; end: Date }
   ): Promise<{
     views: number;
     favorites: number;
@@ -145,8 +145,8 @@ export class AnalyticsAPI {
    * Note: This would typically require integration with analytics services
    */
   async getTrafficSources(
-    shopId: string | number,
-    period: 'day' | 'week' | 'month'
+    _shopId: string | number,
+    _period: 'day' | 'week' | 'month'
   ): Promise<{
     sources: Array<{
       source: string;
@@ -168,9 +168,9 @@ export class AnalyticsAPI {
    * Get revenue trends
    */
   async getRevenueTrends(
-    shopId: string | number,
-    period: 'daily' | 'weekly' | 'monthly',
-    limit = 30
+    _shopId: string | number,
+    _period: 'daily' | 'weekly' | 'monthly',
+    _limit = 30
   ): Promise<Array<{
     date: string;
     revenue: number;

@@ -199,7 +199,7 @@ export class TaxonomyAPI {
         }
       }
 
-      if (score > 0) {
+      if (score > 0 && node.id !== undefined) {
         scores.set(node.id, score);
       }
     }
@@ -208,7 +208,7 @@ export class TaxonomyAPI {
     const sortedNodes = Array.from(scores.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
-      .map(([nodeId]) => allNodes.find((n) => n.id === nodeId)!)
+      .map(([nodeId]) => allNodes.find((n) => (n.id || n.taxonomy_id) === nodeId)!)
       .filter(Boolean);
 
     return sortedNodes;

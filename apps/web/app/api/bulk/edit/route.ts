@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { ListingRepository } from '@/lib/repositories/listing.repository';
 import { EtsyService } from '@/lib/services/etsy.service';
+import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
 const bulkEditSchema = z.object({
@@ -45,6 +46,13 @@ export async function POST(request: NextRequest) {
     // Get listings to verify ownership
     const listings = await ListingRepository.findByIds(listingIds, session.user.id);
     
+    // Get user's Etsy access token
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { etsyAccessToken: true }
+    });
+    const etsyAccessToken = user?.etsyAccessToken;
+    
     if (listings.length !== listingIds.length) {
       return NextResponse.json(
         { error: 'Some listings not found or unauthorized' },
@@ -65,7 +73,7 @@ export async function POST(request: NextRequest) {
         
         // Process price updates
         if (updates.price) {
-          const currentPrice = listing.price || 0;
+          const currentPrice = Number(listing.price) || 0;
           let newPrice = currentPrice;
           
           switch (updates.price.action) {
@@ -126,10 +134,10 @@ export async function POST(request: NextRequest) {
               newTags = [...new Set([...currentTags, ...updates.tags.value])];
               break;
             case 'remove':
-              newTags = currentTags.filter(tag => !updates.tags.value.includes(tag));
+              newTags = currentTags.filter(tag => !updates.tags?.value.includes(tag));
               break;
             case 'replace':
-              newTags = updates.tags.value;
+              newTags = updates.tags?.value || [];
               break;
           }
           
@@ -143,7 +151,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (updates.shippingTemplateId) {
-          updateData.shippingTemplateId = updates.shippingTemplateId;
+          updateData.shippingProfile = { connect: { id: updates.shippingTemplateId } };
         }
 
         if (updates.materials) {
@@ -151,22 +159,22 @@ export async function POST(request: NextRequest) {
         }
 
         if (updates.sectionId) {
-          updateData.sectionId = updates.sectionId;
+          updateData.shopSection = { connect: { id: updates.sectionId } };
         }
 
         // Update listing
         await ListingRepository.update(listing.id, updateData);
         
         // Sync with Etsy if shop has API credentials
-        if (listing.shop.etsyAccessToken && listing.etsyListingId) {
-          const etsyService = new EtsyService(listing.shop.etsyAccessToken);
+        if (etsyAccessToken && listing.etsyListingId) {
+          const etsyService = new EtsyService(etsyAccessToken);
           await etsyService.updateListing(listing.etsyListingId, updateData);
         }
         
         results.updated++;
       } catch (error) {
         results.failed++;
-        results.errors.push(`Failed to update listing ${listing.id}: ${error.message}`);
+        results.errors.push(`Failed to update listing ${listing.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     }
 
@@ -174,7 +182,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Bulk edit error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to perform bulk edit' },
+      { error: error instanceof Error ? error.message : 'Failed to perform bulk edit' },
       { status: 500 }
     );
   }

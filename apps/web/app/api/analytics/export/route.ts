@@ -21,8 +21,6 @@ export async function POST(req: NextRequest) {
       periodStats,
       salesByDay,
       topProducts,
-      customerStats,
-      trafficSources,
     ] = await Promise.all([
       AnalyticsRepository.getPeriodStats(shopId, {
         start: new Date(dateRange.from),
@@ -33,11 +31,6 @@ export async function POST(req: NextRequest) {
         end: new Date(dateRange.to),
       }),
       AnalyticsRepository.getTopProducts(shopId, {
-        start: new Date(dateRange.from),
-        end: new Date(dateRange.to),
-      }),
-      AnalyticsRepository.getCustomerStats(shopId),
-      AnalyticsRepository.getTrafficSources(shopId, {
         start: new Date(dateRange.from),
         end: new Date(dateRange.to),
       }),
@@ -78,7 +71,21 @@ export async function POST(req: NextRequest) {
       let csv = '';
       csvSections.forEach(({ section, data }) => {
         csv += `\n${section}\n`;
-        csv += parse(data) + '\n';
+        try {
+          csv += parse(data as any) + '\n';
+        } catch (error) {
+          // Fallback to simple CSV format
+          if (Array.isArray(data) && data.length > 0) {
+            const firstRow = data[0];
+            if (firstRow && typeof firstRow === 'object') {
+              const headers = Object.keys(firstRow);
+              csv += headers.join(',') + '\n';
+              data.forEach((row: any) => {
+                csv += headers.map(h => row[h] || '').join(',') + '\n';
+              });
+            }
+          }
+        }
       });
 
       return new NextResponse(csv, {

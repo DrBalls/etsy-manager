@@ -16,7 +16,7 @@ import {
   isRateLimitError,
   getRetryAfter,
   ExponentialBackoff
-} from '../utils/rate-limit';
+} from '../utils/exponential-backoff';
 
 export interface CacheEntry {
   data: any;

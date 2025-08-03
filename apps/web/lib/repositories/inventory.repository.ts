@@ -12,12 +12,67 @@ export class InventoryRepository {
   }
 
   /**
+   * Find inventory item by ID with listing data
+   */
+  static async findByIdWithListing(id: string) {
+    return prisma.inventoryItem.findUnique({
+      where: { id },
+      include: {
+        listing: {
+          select: {
+            id: true,
+            userId: true,
+            title: true,
+          },
+        },
+      },
+    });
+  }
+
+  /**
+   * Find multiple inventory items by IDs with listing data
+   */
+  static async findByIds(ids: string[]) {
+    return prisma.inventoryItem.findMany({
+      where: {
+        id: { in: ids },
+      },
+      include: {
+        listing: {
+          select: {
+            id: true,
+            userId: true,
+            title: true,
+          },
+        },
+      },
+    });
+  }
+
+  /**
    * Get all inventory items for a listing
    */
   static async findByListing(listingId: string): Promise<InventoryItem[]> {
     return prisma.inventoryItem.findMany({
       where: { listingId },
       orderBy: { price: 'asc' },
+    });
+  }
+
+  /**
+   * Get all inventory items for a shop
+   */
+  static async findByShopId(shopId: string) {
+    return prisma.inventoryItem.findMany({
+      where: {
+        listing: { shopId },
+        isTracking: true,
+      },
+      include: {
+        listing: {
+          select: { id: true, title: true },
+        },
+      },
     });
   }
 
@@ -59,6 +114,16 @@ export class InventoryRepository {
   }
 
   /**
+   * Alias for getLowStockItems for consistency
+   */
+  static async findLowStock(
+    shopId: string,
+    threshold?: number
+  ): Promise<Array<InventoryItem & { listing: { id: string; title: string } }>> {
+    return this.getLowStockItems(shopId, threshold);
+  }
+
+  /**
    * Update inventory quantity
    */
   static async updateQuantity(
@@ -68,6 +133,23 @@ export class InventoryRepository {
     return prisma.inventoryItem.update({
       where: { id },
       data: { quantity },
+    });
+  }
+
+  /**
+   * Update inventory item
+   */
+  static async update(
+    id: string,
+    data: Partial<{
+      quantity: number;
+      lowStockAlert: number | null;
+      updatedAt: Date;
+    }>
+  ): Promise<InventoryItem> {
+    return prisma.inventoryItem.update({
+      where: { id },
+      data,
     });
   }
 

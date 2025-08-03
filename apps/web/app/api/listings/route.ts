@@ -22,7 +22,7 @@ const createListingSchema = z.object({
 // GET /api/listings
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth();
+    const session = await requireAuth();
     const searchParams = request.nextUrl.searchParams;
     const shopId = searchParams.get('shopId');
     const state = searchParams.get('state');
@@ -34,25 +34,32 @@ export async function GET(request: NextRequest) {
     if (shopId) {
       // Verify user owns the shop
       const shop = await ShopRepository.findById(shopId);
-      if (!shop || shop.userId !== user.id) {
+      if (!shop || shop.userId !== session.user.id) {
         return NextResponse.json(
           { error: 'Shop not found' },
           { status: 404 }
         );
       }
       
-      listings = await ListingRepository.findByShopId(shopId, {
+      listings = await ListingRepository.findByShop(shopId, {
         state: state as any,
-        limit,
-        offset,
+        pageSize: limit,
+        page: Math.floor(offset / limit) + 1,
       });
     } else {
-      // Get all listings for the user
-      listings = await ListingRepository.findByUserId(user.id, {
-        state: state as any,
-        limit,
-        offset,
-      });
+      // Get all shops for the user
+      const shops = await ShopRepository.findByUserId(session.user.id);
+      
+      // Get all listings from all shops
+      const allListings = await Promise.all(
+        shops.map(shop => ListingRepository.findByShopId(shop.id))
+      );
+      
+      // Flatten and sort listings
+      listings = allListings
+        .flat()
+        .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+        .slice(offset, offset + limit);
     }
 
     return NextResponse.json(listings);
@@ -68,26 +75,34 @@ export async function GET(request: NextRequest) {
 // POST /api/listings
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth();
+    const session = await requireAuth();
     const body = await request.json();
     const validatedData = createListingSchema.parse(body);
 
     // Verify user owns the shop
     const shop = await ShopRepository.findById(validatedData.shopId);
-    if (!shop || shop.userId !== user.id) {
+    if (!shop || shop.userId !== session.user.id) {
       return NextResponse.json(
         { error: 'Shop not found' },
         { status: 404 }
       );
     }
 
+    // Generate a temporary Etsy listing ID for drafts
+    const tempEtsyListingId = `draft_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    
     const listing = await ListingRepository.create({
       ...validatedData,
-      userId: user.id,
+      user: { connect: { id: session.user.id } },
+      shop: { connect: { id: shop.id } },
       state: 'DRAFT',
       currencyCode: shop.currencyCode,
       views: 0,
       favoritersCount: 0,
+      etsyListingId: tempEtsyListingId,
+      url: '',  // Will be set when published to Etsy
+      etsyCreatedAt: new Date(),
+      etsyUpdatedAt: new Date(),
     });
 
     return NextResponse.json(listing);

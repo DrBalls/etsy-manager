@@ -356,7 +356,12 @@ export class AnalyticsRepository {
       revenue: Number(day.revenue),
       orders: day.orders,
       averageOrderValue: day.orders > 0 ? Number(day.revenue) / day.orders : 0,
-    }));
+    })) as Array<{
+      date: string;
+      revenue: number;
+      orders: number;
+      averageOrderValue: number;
+    }>;
   }
 
   /**
@@ -513,7 +518,7 @@ export class AnalyticsRepository {
       }).length;
 
       growth.push({
-        date: dateStr,
+        date: dateStr as string,
         newCustomers: dayNewCustomers,
         returningCustomers: dayReturningCustomers,
       });

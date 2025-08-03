@@ -18,10 +18,10 @@ interface ListingEditPageProps {
 }
 
 export default async function ListingEditPage({ params }: ListingEditPageProps) {
-  const user = await requireAuth();
-  const listing = await ListingRepository.findById(params.listingId);
+  const session = await requireAuth();
+  const listing = await ListingRepository.findWithMedia(params.listingId);
 
-  if (!listing || listing.userId !== user.id) {
+  if (!listing || listing.userId !== session.user.id) {
     notFound();
   }
 
@@ -96,51 +96,24 @@ export default async function ListingEditPage({ params }: ListingEditPageProps) 
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="who-made">Who Made</Label>
-                  <Select defaultValue={listing.whoMade || 'i_did'}>
-                    <SelectTrigger id="who-made">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="i_did">I did</SelectItem>
-                      <SelectItem value="collective">A member of my shop</SelectItem>
-                      <SelectItem value="someone_else">Another company or person</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="category">Category</Label>
+                  <Input
+                    id="category"
+                    type="text"
+                    defaultValue={listing.categoryPath?.join(' > ') || ''}
+                    placeholder="Category path"
+                    readOnly
+                  />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="when-made">When Made</Label>
-                  <Select defaultValue={listing.whenMade || 'made_to_order'}>
-                    <SelectTrigger id="when-made">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="made_to_order">Made to order</SelectItem>
-                      <SelectItem value="2020_2024">2020-2024</SelectItem>
-                      <SelectItem value="2010_2019">2010-2019</SelectItem>
-                      <SelectItem value="2005_2009">2005-2009</SelectItem>
-                      <SelectItem value="before_2005">Before 2005</SelectItem>
-                      <SelectItem value="2000_2004">2000-2004</SelectItem>
-                      <SelectItem value="1990s">1990s</SelectItem>
-                      <SelectItem value="1980s">1980s</SelectItem>
-                      <SelectItem value="1970s">1970s</SelectItem>
-                      <SelectItem value="1960s">1960s</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="is-supply">Is Supply</Label>
-                  <Select defaultValue={listing.isSupply ? 'true' : 'false'}>
-                    <SelectTrigger id="is-supply">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="false">No</SelectItem>
-                      <SelectItem value="true">Yes</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="sku">SKU Number</Label>
+                  <Input
+                    id="sku"
+                    type="text"
+                    defaultValue={listing.skuNumber || ''}
+                    placeholder="SKU number"
+                  />
                 </div>
               </div>
             </CardContent>
@@ -165,7 +138,7 @@ export default async function ListingEditPage({ params }: ListingEditPageProps) 
                       id="price"
                       type="number"
                       step="0.01"
-                      defaultValue={listing.price}
+                      defaultValue={listing.price.toString()}
                       className="pl-7"
                       placeholder="0.00"
                     />
@@ -183,12 +156,13 @@ export default async function ListingEditPage({ params }: ListingEditPageProps) 
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="sku">SKU</Label>
+                  <Label htmlFor="currency">Currency</Label>
                   <Input
-                    id="sku"
+                    id="currency"
                     type="text"
-                    defaultValue={listing.sku || ''}
-                    placeholder="Optional SKU"
+                    defaultValue={listing.currencyCode}
+                    placeholder="Currency code"
+                    readOnly
                   />
                 </div>
 
@@ -198,14 +172,14 @@ export default async function ListingEditPage({ params }: ListingEditPageProps) 
                     <Input
                       id="processing-min"
                       type="number"
-                      defaultValue={listing.processingMin || 1}
+                      defaultValue={listing.processingTimeMin || 1}
                       placeholder="Min"
                     />
                     <span className="flex items-center">to</span>
                     <Input
                       id="processing-max"
                       type="number"
-                      defaultValue={listing.processingMax || 3}
+                      defaultValue={listing.processingTimeMax || 3}
                       placeholder="Max"
                     />
                     <span className="flex items-center">days</span>

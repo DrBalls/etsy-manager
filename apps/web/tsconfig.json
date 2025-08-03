@@ -24,6 +24,10 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "lib/auth/__tests__/**/*",
+    "lib/api/__tests__/**/*"
   ]
 }

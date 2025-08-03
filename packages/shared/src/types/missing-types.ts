@@ -1,5 +1,5 @@
 // Missing types for SDK modules
-import { type PaginationParams } from './etsy-api';
+import { type PaginationParams, type Money } from './etsy-api';
 import { type Shop } from './shop';
 import { type User } from './user';
 
@@ -66,6 +66,7 @@ export interface PropertyValue {
   property_id: number;
   property_name?: string;
   scale_id?: number;
+  value_id?: number; // For possible_values in taxonomy
   value_ids: number[];
   values: string[];
 }
@@ -331,18 +332,73 @@ export interface TaxonomyNodeProperty {
   name: string;
   display_name: string;
   is_required: boolean;
+  required?: boolean; // Alias for is_required
   supports_attributes: boolean;
   supports_variations: boolean;
   is_multivalued: boolean;
+  max_values_allowed?: number;
   possible_values?: PropertyValue[];
   selected_values?: PropertyValue[];
 }
 
 export interface SellerTaxonomyNode {
   taxonomy_id: number;
+  id?: number; // Alias for taxonomy_id
   name: string;
   path: string[];
+  parent_id?: number;
 }
 
 // Shipping profile type from etsy-api is already exported
 export { ShippingProfile } from './etsy-api';
+
+// Additional shipping types
+export interface CreateShippingProfileRequest {
+  title: string;
+  origin_country_iso: string;
+  origin_postal_code?: string;
+  primary_cost: number;
+  secondary_cost: number;
+  min_processing_days: number;
+  max_processing_days: number;
+  processing_days_display_label?: string;
+  profile_type?: 'manual' | 'calculated';
+}
+
+export interface UpdateShippingProfileRequest {
+  title?: string;
+  origin_country_iso?: string;
+  origin_postal_code?: string;
+  primary_cost?: number;
+  secondary_cost?: number;
+  min_processing_days?: number;
+  max_processing_days?: number;
+  processing_days_display_label?: string;
+  profile_type?: 'manual' | 'calculated';
+}
+
+export interface ShippingProfileDestination {
+  shipping_profile_destination_id: number;
+  shipping_profile_id: number;
+  origin_country_iso: string;
+  destination_country_iso: string;
+  destination_region?: string;
+  primary_cost: Money;
+  secondary_cost: Money;
+  shipping_carrier_id?: number;
+  mail_class?: string;
+  min_delivery_days?: number;
+  max_delivery_days?: number;
+}
+
+export interface ShippingProfileUpgrade {
+  shipping_profile_upgrade_id: number;
+  shipping_profile_id: number;
+  upgrade_name: string;
+  price: Money;
+  secondary_price: Money;
+  shipping_carrier_id?: number;
+  mail_class?: string;
+  min_delivery_days?: number;
+  max_delivery_days?: number;
+}

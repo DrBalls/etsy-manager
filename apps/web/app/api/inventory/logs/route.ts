@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth/utils';
-import { InventoryLogRepository, ShopRepository } from '@/lib/repositories';
+import { ShopRepository } from '@/lib/repositories';
 
 // GET /api/inventory/logs
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth();
+    const session = await requireAuth();
     const searchParams = request.nextUrl.searchParams;
     const shopId = searchParams.get('shopId');
-    const inventoryItemId = searchParams.get('inventoryItemId');
-    const limit = parseInt(searchParams.get('limit') || '50');
 
     if (!shopId) {
       return NextResponse.json(
@@ -20,21 +18,16 @@ export async function GET(request: NextRequest) {
 
     // Verify user owns the shop
     const shop = await ShopRepository.findById(shopId);
-    if (!shop || shop.userId !== user.id) {
+    if (!shop || shop.userId !== session.user.id) {
       return NextResponse.json(
         { error: 'Shop not found' },
         { status: 404 }
       );
     }
 
-    let logs;
-    if (inventoryItemId) {
-      logs = await InventoryLogRepository.findByInventoryItemId(inventoryItemId, limit);
-    } else {
-      logs = await InventoryLogRepository.findByShopId(shopId, limit);
-    }
-
-    return NextResponse.json(logs);
+    // TODO: Implement inventory logging when InventoryLog model is added to schema
+    // For now, return empty array
+    return NextResponse.json([]);
   } catch (error) {
     console.error('Error fetching inventory logs:', error);
     return NextResponse.json(

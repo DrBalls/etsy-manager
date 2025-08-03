@@ -48,7 +48,11 @@ export class OrderRepository {
       include: {
         items: {
           include: {
-            listing: true,
+            listing: {
+              include: {
+                images: true,
+              },
+            },
           },
         },
         shippingAddress: true,
@@ -134,6 +138,31 @@ export class OrderRepository {
     return prisma.order.findMany({
       where: { shopId, status },
       orderBy: { etsyCreatedAt: 'desc' },
+    });
+  }
+
+  /**
+   * Find orders containing a specific listing within a date range
+   */
+  static async findByListingId(
+    listingId: string,
+    options?: { startDate?: Date; endDate?: Date }
+  ) {
+    return prisma.order.findMany({
+      where: {
+        items: {
+          some: { listingId },
+        },
+        createdAt: {
+          gte: options?.startDate,
+          lte: options?.endDate,
+        },
+      },
+      include: {
+        items: {
+          where: { listingId },
+        },
+      },
     });
   }
 
@@ -252,7 +281,7 @@ export class OrderRepository {
       processingOrders: statusMap['processing'] || 0,
       shippedOrders: statusMap['shipped'] || 0,
       completedOrders: statusMap['completed'] || 0,
-      totalRevenue: revenue._sum.totalAmount || 0,
+      totalRevenue: Number(revenue._sum.totalAmount) || 0,
     };
   }
 

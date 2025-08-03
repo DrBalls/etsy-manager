@@ -22,7 +22,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Package, AlertTriangle, TrendingDown, Edit, Plus, Minus, Save } from 'lucide-react';
 import { toast } from 'sonner';
@@ -38,13 +37,15 @@ interface InventoryItem {
     etsyListingId?: string;
     images?: { url: string }[];
   };
-  sku?: string;
+  sku?: string | null;
   quantity: number;
-  price: number;
-  lowStockAlert?: number;
-  reservedQuantity: number;
-  availableQuantity: number;
-  updatedAt: Date;
+  price: any; // Prisma Decimal type
+  lowStockAlert?: number | null;
+  updatedAt?: Date;
+  isTracking?: boolean;
+  productId?: string;
+  propertyValues?: any;
+  createdAt?: Date;
 }
 
 interface InventoryClientProps {
@@ -56,7 +57,6 @@ interface InventoryClientProps {
 export function InventoryClient({ initialInventory, lowStockItems, shopId }: InventoryClientProps) {
   const [inventory, setInventory] = useState(initialInventory);
   const [editingItem, setEditingItem] = useState<string | null>(null);
-  const [adjustmentAmounts, setAdjustmentAmounts] = useState<Record<string, number>>({});
   const [showAdjustDialog, setShowAdjustDialog] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [adjustmentType, setAdjustmentType] = useState<'add' | 'subtract'>('add');
@@ -214,8 +214,6 @@ export function InventoryClient({ initialInventory, lowStockItems, shopId }: Inv
                     <TableHead>Product</TableHead>
                     <TableHead>SKU</TableHead>
                     <TableHead>Stock</TableHead>
-                    <TableHead>Reserved</TableHead>
-                    <TableHead>Available</TableHead>
                     <TableHead>Value</TableHead>
                     <TableHead>Low Stock Alert</TableHead>
                     <TableHead>Actions</TableHead>
@@ -256,8 +254,6 @@ export function InventoryClient({ initialInventory, lowStockItems, shopId }: Inv
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>{item.reservedQuantity}</TableCell>
-                      <TableCell>{item.availableQuantity}</TableCell>
                       <TableCell>${(item.price * item.quantity).toFixed(2)}</TableCell>
                       <TableCell>
                         {editingItem === item.id ? (

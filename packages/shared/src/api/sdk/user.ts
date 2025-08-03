@@ -83,7 +83,7 @@ export class UserAPI {
   /**
    * Check if user has a specific permission/scope
    */
-  async checkPermission(scope: string): Promise<boolean> {
+  async checkPermission(_scope: string): Promise<boolean> {
     try {
       // Try to get user info to verify auth is working
       await this.getMe();
@@ -175,13 +175,13 @@ export class UserAPI {
     const user = targetUserId === 'me' ? await this.getMe() : await this.getUser(targetUserId);
 
     // Get user's shops
-    const shops = await this.getUserShops(user.user_id);
+    const shops = user.user_id ? await this.getUserShops(user.user_id) : [];
 
     return {
       user,
       shops,
       is_seller: shops.length > 0,
-      member_since: new Date(user.create_timestamp * 1000),
+      member_since: new Date((user.create_timestamp || 0) * 1000),
     };
   }
 }

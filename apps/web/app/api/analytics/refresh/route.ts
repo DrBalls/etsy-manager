@@ -23,10 +23,12 @@ export async function POST(req: NextRequest) {
     const startOfToday = startOfDay(today);
     const endOfToday = endOfDay(today);
 
-    // Get today's orders
-    const todayOrders = await OrderRepository.findByShopId(shopId, {
-      startDate: startOfToday,
-      endDate: endOfToday,
+    // Get today's orders using findByShop method
+    const { data: todayOrders } = await OrderRepository.findByShop(shopId, {
+      dateRange: {
+        start: startOfToday,
+        end: endOfToday,
+      },
     });
 
     // Calculate today's metrics

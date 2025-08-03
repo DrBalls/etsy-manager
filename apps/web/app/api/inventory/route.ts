@@ -14,7 +14,7 @@ const bulkUpdateSchema = z.object({
 // GET /api/inventory
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth();
+    const session = await requireAuth();
     const searchParams = request.nextUrl.searchParams;
     const shopId = searchParams.get('shopId');
     const lowStock = searchParams.get('lowStock') === 'true';
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     // Verify user owns the shop
     const shop = await ShopRepository.findById(shopId);
-    if (!shop || shop.userId !== user.id) {
+    if (!shop || shop.userId !== session.user.id) {
       return NextResponse.json(
         { error: 'Shop not found' },
         { status: 404 }
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     let inventory;
     if (lowStock) {
-      inventory = await InventoryRepository.findLowStock(shopId);
+      inventory = await InventoryRepository.getLowStockItems(shopId);
     } else {
       inventory = await InventoryRepository.findByShopId(shopId);
     }
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
 // POST /api/inventory (bulk update)
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth();
+    const { user } = await requireAuth();
     const body = await request.json();
     const { updates } = bulkUpdateSchema.parse(body);
 
@@ -78,16 +78,12 @@ export async function POST(request: NextRequest) {
         const item = items.find(i => i.id === update.inventoryId);
         if (!item) return null;
 
-        const updatedData: any = {
-          ...update,
+        const { inventoryId, ...updateData } = update;
+
+        return InventoryRepository.update(inventoryId, {
+          ...updateData,
           updatedAt: new Date(),
-        };
-
-        if (update.quantity !== undefined) {
-          updatedData.availableQuantity = update.quantity - (item.reservedQuantity || 0);
-        }
-
-        return InventoryRepository.update(update.inventoryId, updatedData);
+        });
       })
     );
 

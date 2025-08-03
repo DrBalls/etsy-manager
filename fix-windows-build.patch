@@ -1,0 +1,145 @@
+diff --git a/packages/shared/tsup.config.ts b/packages/shared/tsup.config.ts
+index 1234567..abcdefg 100644
+--- a/packages/shared/tsup.config.ts
++++ b/packages/shared/tsup.config.ts
+@@ -8,9 +8,20 @@ export default defineConfig({
+     api: 'src/api/index.ts',
+   },
+   format: ['cjs', 'esm'],
+-  dts: true,
++  dts: {
++    resolve: true,
++    // Workaround for Windows DTS build issues
++    compilerOptions: {
++      composite: false,
++      incremental: false,
++    },
++  },
+   splitting: false,
+   sourcemap: true,
+   clean: true,
+   shims: true,
++  // Disable parallel builds on Windows
++  target: 'es2022',
++  platform: 'node',
+ });
+diff --git a/packages/shared/package.json b/packages/shared/package.json
+index 1234567..abcdefg 100644
+--- a/packages/shared/package.json
++++ b/packages/shared/package.json
+@@ -13,18 +13,19 @@
+       "require": "./dist/index.js"
+     },
+     "./types": {
+-      "types": "./dist/types/index.d.ts",
+-      "import": "./dist/types/index.mjs",
+-      "require": "./dist/types/index.js"
++      "types": "./dist/types.d.ts",
++      "import": "./dist/types.mjs",
++      "require": "./dist/types.js"
+     },
+     "./utils": {
+-      "types": "./dist/utils/index.d.ts",
+-      "import": "./dist/utils/index.mjs",
+-      "require": "./dist/utils/index.js"
++      "types": "./dist/utils.d.ts",
++      "import": "./dist/utils.mjs",
++      "require": "./dist/utils.js"
+     },
+     "./api": {
+-      "types": "./dist/api/index.d.ts",
+-      "import": "./dist/api/index.mjs",
+-      "require": "./dist/api/index.js"
++      "types": "./dist/api.d.ts",
++      "import": "./dist/api.mjs",
++      "require": "./dist/api.js"
+     }
+   },
+   "scripts": {
+-    "build": "tsup",
++    "build": "tsup || node build-windows.js",
++    "build:windows": "node build-windows.js",
+     "dev": "tsup --watch",
+     "lint": "eslint src --ext .ts,.tsx",
+     "lint:fix": "eslint src --ext .ts,.tsx --fix",
+@@ -43,7 +44,7 @@
+   "devDependencies": {
+     "@types/node": "^20.14.10",
+     "ioredis": "^5.4.1",
+-    "tsup": "^8.1.0",
++    "tsup": "^8.5.0",
+     "typescript": "^5.5.4"
+   },
+   "files": [
+diff --git a/packages/shared/tsconfig.json b/packages/shared/tsconfig.json
+index 1234567..abcdefg 100644
+--- a/packages/shared/tsconfig.json
++++ b/packages/shared/tsconfig.json
+@@ -4,7 +4,9 @@
+     "rootDir": "./src",
+     "outDir": "./dist",
+     "declaration": true,
+-    "declarationMap": true
++    "declarationMap": true,
++    "composite": false,
++    "incremental": false
+   },
+   "include": ["src/**/*"],
+   "exclude": ["**/*.test.ts", "**/*.spec.ts", "node_modules", "dist"]
+diff --git a/packages/shared/build-windows.js b/packages/shared/build-windows.js
+new file mode 100644
+index 0000000..1234567
+--- /dev/null
++++ b/packages/shared/build-windows.js
+@@ -0,0 +1,49 @@
++const { build } = require('tsup');
++const { rm } = require('fs/promises');
++const path = require('path');
++
++async function buildWindows() {
++  console.log('Starting Windows-compatible build...');
++  
++  // Clean dist directory
++  try {
++    await rm(path.join(__dirname, 'dist'), { recursive: true, force: true });
++  } catch (e) {
++    // Ignore if doesn't exist
++  }
++
++  try {
++    // Build without DTS first
++    await build({
++      entry: {
++        index: 'src/index.ts',
++        types: 'src/types/index.ts',
++        utils: 'src/utils/index.ts',
++        api: 'src/api/index.ts',
++      },
++      format: ['cjs', 'esm'],
++      dts: false, // Disable DTS for initial build
++      splitting: false,
++      sourcemap: true,
++      clean: true,
++      shims: true,
++      target: 'es2022',
++      platform: 'node',
++    });
++
++    console.log('JavaScript build completed successfully');
++
++    // Generate types separately using tsc
++    console.log('Generating type declarations...');
++    const { execSync } = require('child_process');
++    execSync('pnpm exec tsc --emitDeclarationOnly --declaration --declarationMap', {
++      stdio: 'inherit',
++      cwd: __dirname,
++    });
++
++    console.log('Build completed successfully!');
++  } catch (error) {
++    console.error('Build failed:', error);
++    process.exit(1);
++  }
++}
++
++buildWindows();

@@ -16,10 +16,10 @@ interface ListingPageProps {
 }
 
 export default async function ListingDetailPage({ params }: ListingPageProps) {
-  const user = await requireAuth();
-  const listing = await ListingRepository.findById(params.listingId);
+  const session = await requireAuth();
+  const listing = await ListingRepository.findWithMedia(params.listingId);
 
-  if (!listing || listing.userId !== user.id) {
+  if (!listing || listing.userId !== session.user.id) {
     notFound();
   }
 
@@ -59,7 +59,7 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${listing.price.toFixed(2)} {listing.currencyCode}
+              ${listing.price.toString()} {listing.currencyCode}
             </div>
           </CardContent>
         </Card>
@@ -128,7 +128,7 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">SKU</p>
-                  <p className="mt-1">{listing.sku || 'Not set'}</p>
+                  <p className="mt-1">{listing.skuNumber || 'Not set'}</p>
                 </div>
               </div>
 
@@ -189,29 +189,7 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
                   </div>
                   <p className="text-2xl font-bold">{listing.quantity}</p>
                 </div>
-                {listing.inventoryItems && listing.inventoryItems.length > 0 && (
-                  <div className="border-t pt-4">
-                    <p className="font-medium mb-2">Variations</p>
-                    <div className="space-y-2">
-                      {listing.inventoryItems.map((item) => (
-                        <div key={item.id} className="flex items-center justify-between py-2">
-                          <div>
-                            <p className="text-sm font-medium">{item.sku || 'No SKU'}</p>
-                            <p className="text-xs text-muted-foreground">
-                              ${item.price.toFixed(2)}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-medium">{item.quantity} in stock</p>
-                            {item.lowStockAlert && item.quantity <= item.lowStockAlert && (
-                              <p className="text-xs text-red-600">Low stock</p>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {/* Inventory variations would be loaded separately if needed */}
               </div>
             </CardContent>
           </Card>

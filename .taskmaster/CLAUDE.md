@@ -412,6 +412,185 @@ These commands make AI calls and may take up to a minute:
 - Provides more informed task creation and updates
 - Recommended for complex technical tasks
 
+## Autonomous Testing Integration
+
+TaskMaster now integrates autonomous testing workflows to minimize manual testing effort while maintaining high quality standards.
+
+### Test-Driven Development with AI Assistance
+
+#### 1. Automatic Test Generation
+
+```bash
+# When implementing a new feature/task
+task-master show <id>                              # Review task requirements
+
+# Generate tests BEFORE implementation (TDD approach)
+# Use MCP testing tools to generate tests automatically
+mcp__mcp-frontend-testing__generateTest           # Generate frontend tests
+mcp__mcp-frontend-testing__testReactComponent     # Test React components
+
+# Update task with test strategy
+task-master update-subtask --id=<id> --prompt="Generated tests for [describe what]. Tests cover [scenarios]"
+```
+
+#### 2. AI-Powered Test Tools
+
+**Primary Tool**: ChatGPT API (via MCP integration)
+**Fallback**: TestGPT or other AI testing frameworks
+
+```bash
+# Analyze code for testability
+mcp__mcp-frontend-testing__analyzeCode
+
+# Generate comprehensive test suites
+mcp__mcp-frontend-testing__generateTest --framework="jest" --type="unit"
+mcp__mcp-frontend-testing__generateTest --framework="cypress" --type="e2e"
+
+# Run tests with AI assistance
+mcp__mcp-frontend-testing__runTest
+```
+
+#### 3. Testing Pipeline Integration
+
+```bash
+# Unit Tests (Fast, local)
+pnpm test:unit                                     # Run on every push
+task-master update-subtask --id=<id> --prompt="Unit tests passing: [coverage %]"
+
+# Integration/API Tests
+pnpm test:integration                              # Via CI/CD pipeline
+task-master update-subtask --id=<id> --prompt="Integration tests: [results]"
+
+# E2E Tests (Self-healing)
+pnpm test:e2e                                      # Playwright with AI locators
+task-master update-subtask --id=<id> --prompt="E2E tests: [scenarios covered]"
+```
+
+### Testing Workflow for Tasks
+
+1. **Task Start**: Review task requirements
+   ```bash
+   task-master show <id>
+   task-master set-status --id=<id> --status=in-progress
+   ```
+
+2. **Generate Tests First** (TDD):
+   ```bash
+   # Analyze existing code patterns
+   mcp__mcp-frontend-testing__analyzeCode
+   
+   # Generate test cases based on requirements
+   mcp__mcp-frontend-testing__generateTest
+   
+   # Log test generation
+   task-master update-subtask --id=<id> --prompt="Generated [N] test cases covering [scenarios]"
+   ```
+
+3. **Implement Feature**: Write code to pass tests
+
+4. **Run Tests Continuously**:
+   ```bash
+   pnpm test:watch                                  # During development
+   pnpm test                                        # Before marking complete
+   ```
+
+5. **Complete Task**:
+   ```bash
+   # Only after all tests pass
+   task-master set-status --id=<id> --status=done
+   ```
+
+### Self-Healing Test Configuration
+
+Add to your test configuration:
+
+```javascript
+// playwright.config.ts - Self-healing locators
+use: {
+  // AI-assisted element detection
+  screenshot: 'only-on-failure',
+  trace: 'on-first-retry',
+  // Custom locator strategies
+  locatorStrategy: 'css-first',
+}
+
+// jest.config.js - Automatic test updates
+testMatch: ['**/__tests__/**/*.test.ts', '**/?(*.)+(spec|test).ts'],
+coverageThreshold: {
+  global: {
+    branches: 80,
+    functions: 80,
+    lines: 80,
+    statements: 80
+  }
+}
+```
+
+### Test Data Management
+
+```bash
+# Synthetic data generation
+task-master update-subtask --id=<id> --prompt="Using Faker.js for test data: [data types]"
+
+# Database snapshots
+pnpm db:test:reset                                # Auto-refresh test DB
+task-master update-subtask --id=<id> --prompt="Test DB reset with seed data"
+```
+
+### CI/CD Integration Commands
+
+```bash
+# GitHub Actions workflow triggers
+git push                                           # Triggers test pipeline
+task-master update-subtask --id=<id> --prompt="CI pipeline: [status]"
+
+# Monitor test results
+gh run list                                        # Check workflow status
+gh run view                                        # View detailed logs
+```
+
+### Autonomous Monitoring Post-Deploy
+
+After task completion and deployment:
+
+```bash
+# Verify deployment health
+task-master update-task --id=<id> --prompt="Deployed to [env]. Monitoring: [metrics]"
+
+# Rollback if needed (automated via canary releases)
+# Monitors handle this automatically
+```
+
+### Best Practices for Autonomous Testing
+
+1. **Always generate tests before implementation**
+2. **Use AI tools to maintain test coverage**
+3. **Let self-healing frameworks handle UI changes**
+4. **Keep test data synthetic and automated**
+5. **Trust the pipeline - no manual intervention**
+
+### Testing-Related Task Updates
+
+When working on tasks, include testing status:
+
+```bash
+# During implementation
+task-master update-subtask --id=<id> --prompt="
+- Implemented: [feature]
+- Tests written: [count]
+- Coverage: [percentage]
+- Status: [passing/failing]
+"
+
+# On completion
+task-master update-subtask --id=<id> --prompt="
+- All tests passing
+- Coverage meets threshold
+- E2E scenarios verified
+- Ready for deployment
+"
+```
+
 ---
 
 _This guide ensures Claude Code has immediate access to Task Master's essential functionality for agentic development workflows._

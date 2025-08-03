@@ -282,7 +282,7 @@ export class InventoryAPI {
 
       byProduct.push({
         product_id: product.product_id,
-        sku: product.sku,
+        sku: product.sku || '',
         total_quantity: productQuantity,
         total_value: productValue,
       });

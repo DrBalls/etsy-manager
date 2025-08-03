@@ -12,23 +12,24 @@
       "require": "./dist/index.js"
     },
     "./types": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/types/index.mjs",
-      "require": "./dist/types/index.js"
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.mjs",
+      "require": "./dist/types.js"
     },
     "./utils": {
-      "types": "./dist/utils/index.d.ts",
-      "import": "./dist/utils/index.mjs",
-      "require": "./dist/utils/index.js"
+      "types": "./dist/utils.d.ts",
+      "import": "./dist/utils.mjs",
+      "require": "./dist/utils.js"
     },
     "./api": {
-      "types": "./dist/api/index.d.ts",
-      "import": "./dist/api/index.mjs",
-      "require": "./dist/api/index.js"
+      "types": "./dist/api.d.ts",
+      "import": "./dist/api.mjs",
+      "require": "./dist/api.js"
     }
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup || node build-windows.js",
+    "build:windows": "node build-windows.js",
     "dev": "tsup --watch",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
@@ -43,7 +44,7 @@
   "devDependencies": {
     "@types/node": "^20.14.10",
     "ioredis": "^5.4.1",
-    "tsup": "^8.1.0",
+    "tsup": "^8.5.0",
     "typescript": "^5.5.4"
   },
   "files": [

@@ -3,10 +3,10 @@ import { ShopRepository, OrderRepository } from '@/lib/repositories';
 import { OrdersClient } from './orders-client';
 
 export default async function OrdersPage() {
-  const user = await requireAuth();
+  const session = await requireAuth();
   
   // Get user's shops
-  const shops = await ShopRepository.findByUserId(user.id);
+  const shops = await ShopRepository.findByUserId(session.user.id);
   const primaryShop = shops[0];
 
   if (!primaryShop) {
@@ -34,9 +34,32 @@ export default async function OrdersPage() {
     OrderRepository.getOrderStats(primaryShop.id),
   ]);
 
+  // Transform orders to match the client component interface
+  const transformedOrders = recentOrders.map(order => ({
+    ...order,
+    totalAmount: Number(order.totalAmount),
+    items: order.items.map(item => ({
+      ...item,
+      price: Number(item.price),
+      listing: item.listing ? {
+        ...item.listing,
+        images: item.listing.images || []
+      } : undefined
+    })),
+    shippingAddress: order.shippingAddress ? {
+      name: order.shippingAddress.name,
+      line1: order.shippingAddress.line1,
+      line2: order.shippingAddress.line2,
+      city: order.shippingAddress.city,
+      state: order.shippingAddress.state,
+      postalCode: order.shippingAddress.postalCode,
+      country: order.shippingAddress.country,
+    } : null
+  }));
+
   return (
     <OrdersClient 
-      initialOrders={recentOrders} 
+      initialOrders={transformedOrders} 
       orderStats={orderStats}
       shopId={primaryShop.id} 
     />

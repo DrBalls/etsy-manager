@@ -8,7 +8,7 @@ export async function POST(
   { params }: { params: { orderId: string } }
 ) {
   try {
-    const user = await requireAuth();
+    const session = await requireAuth();
     const { message } = await request.json();
 
     if (!message || message.trim() === '') {
@@ -23,7 +23,7 @@ export async function POST(
       where: {
         id: params.orderId,
         shop: {
-          userId: user.id,
+          userId: session.user.id,
         },
       },
       include: {
@@ -49,9 +49,14 @@ export async function POST(
     });
 
     // Send message through Etsy
-    if (order.shop.etsyAccessToken) {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { etsyAccessToken: true },
+    });
+
+    if (user?.etsyAccessToken) {
       try {
-        const etsyClient = new EtsyClient(order.shop.etsyAccessToken);
+        const etsyClient = new EtsyClient(user.etsyAccessToken);
         await etsyClient.sendOrderMessage(
           order.shop.etsyShopId,
           order.etsyOrderId,
@@ -78,18 +83,18 @@ export async function POST(
 }
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { orderId: string } }
 ) {
   try {
-    const user = await requireAuth();
+    const session = await requireAuth();
 
     // Verify order ownership
     const order = await prisma.order.findFirst({
       where: {
         id: params.orderId,
         shop: {
-          userId: user.id,
+          userId: session.user.id,
         },
       },
     });

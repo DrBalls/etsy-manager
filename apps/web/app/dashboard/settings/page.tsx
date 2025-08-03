@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default async function SettingsPage() {
-  const user = await requireAuth();
+  const session = await requireAuth();
 
   return (
     <div className="space-y-6">
@@ -34,7 +34,7 @@ export default async function SettingsPage() {
                 <Input
                   id="name"
                   type="text"
-                  defaultValue={user.name || ''}
+                  defaultValue={session.user.name || ''}
                   placeholder="Your name"
                 />
               </div>
@@ -43,7 +43,7 @@ export default async function SettingsPage() {
                 <Input
                   id="email"
                   type="email"
-                  defaultValue={user.email}
+                  defaultValue={session.user.email || ''}
                   disabled
                 />
               </div>

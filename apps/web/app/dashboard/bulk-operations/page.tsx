@@ -19,7 +19,7 @@ export default async function BulkOperationsPage() {
   }
 
   const shops = await ShopRepository.findByUserId(session.user.id);
-  const primaryShop = shops.find(shop => shop.isPrimary) || shops[0];
+  const primaryShop = shops[0]; // Use the first shop as primary
 
   if (!primaryShop) {
     redirect('/dashboard/shops');

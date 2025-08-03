@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { TrendingDown, AlertTriangle, Calendar, Package } from 'lucide-react';
-import { format, addDays } from 'date-fns';
+import { format } from 'date-fns';
 
 interface StockForecast {
   inventoryItemId: string;

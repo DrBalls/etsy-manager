@@ -6,19 +6,18 @@ import { z } from 'zod';
 const updateInventorySchema = z.object({
   quantity: z.number().int().min(0).optional(),
   lowStockAlert: z.number().int().positive().optional(),
-  reservedQuantity: z.number().int().min(0).optional(),
 });
 
 // GET /api/inventory/[inventoryId]
 export async function GET(
-  request: NextRequest,
+  _: NextRequest,
   { params }: { params: { inventoryId: string } }
 ) {
   try {
-    const user = await requireAuth();
-    const item = await InventoryRepository.findById(params.inventoryId);
+    const session = await requireAuth();
+    const item = await InventoryRepository.findByIdWithListing(params.inventoryId);
 
-    if (!item || item.listing?.userId !== user.id) {
+    if (!item || item.listing?.userId !== session.user.id) {
       return NextResponse.json(
         { error: 'Inventory item not found' },
         { status: 404 }
@@ -41,10 +40,10 @@ export async function PATCH(
   { params }: { params: { inventoryId: string } }
 ) {
   try {
-    const user = await requireAuth();
-    const item = await InventoryRepository.findById(params.inventoryId);
+    const session = await requireAuth();
+    const item = await InventoryRepository.findByIdWithListing(params.inventoryId);
 
-    if (!item || item.listing?.userId !== user.id) {
+    if (!item || item.listing?.userId !== session.user.id) {
       return NextResponse.json(
         { error: 'Inventory item not found' },
         { status: 404 }
@@ -56,9 +55,6 @@ export async function PATCH(
 
     const updatedItem = await InventoryRepository.update(params.inventoryId, {
       ...validatedData,
-      availableQuantity: validatedData.quantity 
-        ? validatedData.quantity - (item.reservedQuantity || 0)
-        : undefined,
       updatedAt: new Date(),
     });
 

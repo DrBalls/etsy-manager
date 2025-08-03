@@ -23,8 +23,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    // Verify shop ownership
-    const shop = await ShopRepository.findById(shopId);
+    // Verify shop ownership and get user data
+    const shop = await ShopRepository.findByIdWithUser(shopId);
     if (!shop || shop.userId !== session.user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
@@ -40,7 +40,14 @@ export async function POST(request: NextRequest) {
     } else if (extension === 'xlsx' || extension === 'xls') {
       const buffer = await file.arrayBuffer();
       const workbook = XLSX.read(buffer, { type: 'array' });
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const firstSheetName = workbook.SheetNames[0];
+      if (!firstSheetName) {
+        return NextResponse.json({ error: 'No sheets found in Excel file' }, { status: 400 });
+      }
+      const firstSheet = workbook.Sheets[firstSheetName];
+      if (!firstSheet) {
+        return NextResponse.json({ error: 'Sheet not found in Excel file' }, { status: 400 });
+      }
       data = XLSX.utils.sheet_to_json(firstSheet);
     } else {
       return NextResponse.json({ error: 'Unsupported file format' }, { status: 400 });
@@ -53,7 +60,7 @@ export async function POST(request: NextRequest) {
       errors: [] as string[],
     };
 
-    const etsyService = shop.etsyAccessToken ? new EtsyService(shop.etsyAccessToken) : null;
+    const etsyService = shop.user.etsyAccessToken ? new EtsyService(shop.user.etsyAccessToken) : null;
 
     // Process each row
     for (let i = 0; i < data.length; i++) {
@@ -99,7 +106,7 @@ export async function POST(request: NextRequest) {
 
         // Map optional fields
         if (mapping.sku && row[mapping.sku]) {
-          listingData.sku = row[mapping.sku];
+          listingData.skuNumber = row[mapping.sku];
         }
 
         if (mapping.tags && row[mapping.tags]) {
@@ -181,7 +188,7 @@ export async function POST(request: NextRequest) {
         results.imported++;
       } catch (error) {
         results.failed++;
-        results.errors.push(`Row ${i + 1}: ${error.message}`);
+        results.errors.push(`Row ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     }
 
@@ -189,7 +196,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Bulk import error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to import listings' },
+      { error: error instanceof Error ? error.message : 'Failed to import listings' },
       { status: 500 }
     );
   }

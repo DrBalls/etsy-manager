@@ -1,12 +1,12 @@
 import { requireAuth } from '@/lib/auth/utils';
-import { ShopRepository, ListingRepository, InventoryRepository } from '@/lib/repositories';
+import { ShopRepository, InventoryRepository } from '@/lib/repositories';
 import { InventoryClient } from './inventory-client';
 
 export default async function InventoryPage() {
-  const user = await requireAuth();
+  const session = await requireAuth();
   
   // Get user's shops
-  const shops = await ShopRepository.findByUserId(user.id);
+  const shops = await ShopRepository.findByUserId(session.user.id);
   const primaryShop = shops[0];
 
   if (!primaryShop) {

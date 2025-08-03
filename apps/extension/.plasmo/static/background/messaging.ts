@@ -6,31 +6,8 @@ import { default as messagesQuickEdit } from "~background/messages/quick-edit"
 import { default as messagesSyncListing } from "~background/messages/sync-listing"
 
 chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => {
-  switch (request.name) {
-    case "bulk-update":
-  messagesBulkUpdate({
-    sender,
-    ...request
-  }, {
-    send: (p) => sendResponse(p)
-  })
-  break
-case "quick-edit":
-  messagesQuickEdit({
-    sender,
-    ...request
-  }, {
-    send: (p) => sendResponse(p)
-  })
-  break
-case "sync-listing":
-  messagesSyncListing({
-    sender,
-    ...request
-  }, {
-    send: (p) => sendResponse(p)
-  })
-  break
+  switch (request?.name) {
+    
     default:
       break
   }
@@ -42,24 +19,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch (request.name) {
     case "bulk-update":
   messagesBulkUpdate({
-    sender,
-    ...request
+    ...request,
+    sender
   }, {
     send: (p) => sendResponse(p)
   })
   break
 case "quick-edit":
   messagesQuickEdit({
-    sender,
-    ...request
+    ...request,
+    sender
   }, {
     send: (p) => sendResponse(p)
   })
   break
 case "sync-listing":
   messagesSyncListing({
-    sender,
-    ...request
+    ...request,
+    sender
   }, {
     send: (p) => sendResponse(p)
   })

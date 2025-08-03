@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth/utils';
-import { OrderRepository } from '@/lib/repositories';
 import { EtsyClient } from '@/lib/etsy/client';
 import { prisma } from '@/lib/prisma';
 
@@ -9,7 +8,7 @@ export async function PATCH(
   { params }: { params: { orderId: string } }
 ) {
   try {
-    const user = await requireAuth();
+    const session = await requireAuth();
     const { status } = await request.json();
 
     // Validate status
@@ -26,7 +25,7 @@ export async function PATCH(
       where: {
         id: params.orderId,
         shop: {
-          userId: user.id,
+          userId: session.user.id,
         },
       },
       include: {
@@ -51,15 +50,22 @@ export async function PATCH(
     });
 
     // If marked as shipped, sync with Etsy
-    if (status === 'shipped' && order.shop.etsyAccessToken) {
-      try {
-        const etsyClient = new EtsyClient(order.shop.etsyAccessToken);
+    if (status === 'shipped') {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { etsyAccessToken: true },
+      });
+
+      if (user?.etsyAccessToken) {
+        try {
+          const etsyClient = new EtsyClient(user.etsyAccessToken);
         await etsyClient.updateShipmentStatus(
           order.shop.etsyShopId,
           order.etsyOrderId
         );
-      } catch (error) {
-        console.error('Failed to sync shipment status with Etsy:', error);
+        } catch (error) {
+          console.error('Failed to sync shipment status with Etsy:', error);
+        }
       }
     }
 

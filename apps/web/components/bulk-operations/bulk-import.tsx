@@ -3,7 +3,6 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -15,7 +14,6 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import {
   Table,
   TableBody,
@@ -103,7 +101,7 @@ export function BulkImport({ onImport, disabled }: BulkImportProps) {
             });
             setMapping(autoMapping);
           },
-          error: (error) => {
+          error: (error: any) => {
             setValidationErrors([`CSV parsing error: ${error.message}`]);
           }
         });
@@ -111,12 +109,21 @@ export function BulkImport({ onImport, disabled }: BulkImportProps) {
         // Process Excel
         const buffer = await acceptedFile.arrayBuffer();
         const workbook = XLSX.read(buffer, { type: 'array' });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const firstSheetName = workbook.SheetNames[0];
+        if (!firstSheetName) {
+          setValidationErrors(['No sheets found in Excel file']);
+          return;
+        }
+        const firstSheet = workbook.Sheets[firstSheetName];
+        if (!firstSheet) {
+          setValidationErrors(['Invalid Excel sheet']);
+          return;
+        }
         const data = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
         
         if (data.length > 0) {
           const headers = data[0] as string[];
-          const rows = data.slice(1, 6).map(row => {
+          const rows = data.slice(1, 6).map((row: any) => {
             const obj: any = {};
             headers.forEach((header, index) => {
               obj[header] = row[index];
@@ -145,7 +152,7 @@ export function BulkImport({ onImport, disabled }: BulkImportProps) {
       }
       
       setFile(acceptedFile);
-    } catch (error) {
+    } catch (error: any) {
       setValidationErrors([`Error processing file: ${error.message}`]);
     } finally {
       setProcessingFile(false);
@@ -153,7 +160,7 @@ export function BulkImport({ onImport, disabled }: BulkImportProps) {
   };
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
+    if (acceptedFiles.length > 0 && acceptedFiles[0]) {
       processFile(acceptedFiles[0]);
     }
   }, []);

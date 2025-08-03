@@ -5,7 +5,7 @@ import { subDays, isAfter, isBefore } from 'date-fns';
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth();
+    const session = await requireAuth();
     const { searchParams } = new URL(request.url);
     const shopId = searchParams.get('shopId');
 
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const shop = await prisma.shop.findFirst({
       where: {
         id: shopId,
-        userId: user.id,
+        userId: session.user.id,
       },
     });
 
@@ -31,7 +31,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const notifications = [];
+    const notifications: Array<{
+      id: string;
+      type: string;
+      order: {
+        id: string;
+        orderNumber: string;
+        buyerName: string;
+        shipByDate?: Date | null;
+      };
+      message: string;
+      createdAt: Date;
+      read: boolean;
+    }> = [];
     const now = new Date();
     const oneDayFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 

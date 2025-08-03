@@ -20,7 +20,6 @@ const statusColors: Record<OrderStatus, string> = {
   [OrderStatus.SHIPPED]: 'bg-purple-100 text-purple-800',
   [OrderStatus.COMPLETED]: 'bg-green-100 text-green-800',
   [OrderStatus.CANCELLED]: 'bg-red-100 text-red-800',
-  [OrderStatus.REFUNDED]: 'bg-gray-100 text-gray-800',
 };
 
 export const OrderColumns: ColumnDef<Order>[] = [
@@ -44,13 +43,13 @@ export const OrderColumns: ColumnDef<Order>[] = [
     },
   },
   {
-    accessorKey: 'customer',
+    accessorKey: 'buyerEmail',
     header: 'Customer',
     cell: ({ row }) => {
       const order = row.original;
       return (
         <div>
-          <div className="font-medium">{order.customer?.name || 'Guest'}</div>
+          <div className="font-medium">{order.buyerName || 'Guest'}</div>
           <div className="text-sm text-muted-foreground">
             {order.buyerEmail}
           </div>
@@ -93,24 +92,8 @@ export const OrderColumns: ColumnDef<Order>[] = [
     },
   },
   {
-    accessorKey: 'shippingAddress',
-    header: 'Ship To',
-    cell: ({ row }) => {
-      const address = row.original.shippingAddress;
-      if (!address) return 'N/A';
-      return (
-        <div className="text-sm">
-          <div>{address.city}, {address.state}</div>
-          <div className="text-muted-foreground">{address.country}</div>
-        </div>
-      );
-    },
-  },
-  {
     id: 'actions',
-    cell: ({ row }) => {
-      const order = row.original;
-
+    cell: () => {
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

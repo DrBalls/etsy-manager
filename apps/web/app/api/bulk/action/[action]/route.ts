@@ -253,7 +253,7 @@ export async function POST(
         for (const listing of listings) {
           try {
             const currentTags = listing.tags || [];
-            const newTags = currentTags.filter(tag => !actionParams.tags.includes(tag));
+            const newTags = currentTags.filter((tag: string) => !actionParams.tags.includes(tag));
             
             await ListingRepository.update(listing.id, { tags: newTags });
             

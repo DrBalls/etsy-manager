@@ -88,7 +88,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: cd apps/web && pnpm prisma generate
       - run: pnpm build --filter=@etsy-manager/web
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: web-build
           path: apps/web/.next
@@ -107,7 +107,7 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm build --filter=@etsy-manager/extension
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: extension-build
           path: apps/extension/build
@@ -135,7 +135,7 @@ jobs:
         run: cd apps/desktop && pnpm dist --win
       - if: matrix.os == 'macos-latest'
         run: cd apps/desktop && pnpm dist --mac
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: desktop-${{ matrix.os }}
           path: apps/desktop/dist-electron
